@@ -3,17 +3,16 @@
 from __future__ import annotations
 
 import json
-from datetime import date
+from datetime import date, timedelta, timezone
 from typing import Mapping
 from urllib.parse import unquote, urljoin
-from zoneinfo import ZoneInfo
 
 from bs4 import BeautifulSoup, NavigableString
 from markdownify import markdownify
 
 from .models import ContentItem
 
-SHANGHAI = ZoneInfo("Asia/Shanghai")
+SHANGHAI = timezone(timedelta(hours=8))
 
 
 def _string(value: str) -> str:
@@ -27,6 +26,9 @@ def _preprocess(html: str, image_map: Mapping[str, str] | None) -> BeautifulSoup
 
     for image in soup.find_all("img"):
         source = image.get("src") or ""
+        if source.startswith("data:"):
+            image.decompose()
+            continue
         if image_map and source in image_map:
             image["src"] = image_map[source]
         elif source.startswith("//"):
@@ -43,7 +45,7 @@ def _preprocess(html: str, image_map: Mapping[str, str] | None) -> BeautifulSoup
 
     for link in soup.find_all("a"):
         href = link.get("href") or ""
-        if href.startswith("//link.zhihu.com/?target="):
+        if "link.zhihu.com/?target=" in href:
             href = unquote(href.split("target=", 1)[1])
         elif href.startswith("/"):
             href = urljoin("https://www.zhihu.com", href)
@@ -88,11 +90,18 @@ def build_front_matter(
     ]
     if item.question:
         lines.append(f"question: {_string(item.question)}")
+    labels = {"answers": "回答", "articles": "文章", "pins": "想法"}
+    label = labels.get(item.kind, item.kind)
+    prefix = ("已从知乎删除 · " if deleted else "") + f"{label} · {item.created.astimezone(SHANGHAI):%Y-%m-%d}"
+    summary = item.summary.strip().replace("\n", " ")
+    if summary:
+        prefix += f" · {summary[:140]}"
     lines.extend(
         [
             f"deleted: {'true' if deleted else 'false'}",
             f"archived_at: {archived_at.isoformat()}",
             f"tags: {json.dumps(item.tags, ensure_ascii=False)}",
+            f"summary: {_string(prefix)}",
         ]
     )
     if has_math:

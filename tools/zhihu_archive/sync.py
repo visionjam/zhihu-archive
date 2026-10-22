@@ -1,8 +1,10 @@
-"""同步编排：列表 → 详情 → 图片 → Markdown → page bundle。"""
+"""同步编排：列表 → 详情（按需）→ 图片 → Markdown → page bundle。"""
 
 from __future__ import annotations
 
+import json
 import shutil
+import sys
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
@@ -14,6 +16,7 @@ from .render import html_to_markdown, render_page
 from .state import SyncState
 
 KINDS = ("answers", "articles", "pins")
+KIND_ALIASES = {"回答": "answers", "文章": "articles", "想法": "pins"}
 
 
 @dataclass
@@ -22,6 +25,7 @@ class SyncReport:
     updated: int = 0
     marked_deleted: int = 0
     failed: int = 0
+    incomplete: bool = False
 
 
 def _load_excluded(state_dir: Path) -> set[tuple[str, str]]:
@@ -34,7 +38,11 @@ def _load_excluded(state_dir: Path) -> set[tuple[str, str]]:
         if not stripped or stripped.startswith("#") or ":" not in stripped:
             continue
         kind, item_id = stripped.split(":", 1)
-        excluded.add((kind.strip(), item_id.strip()))
+        kind = KIND_ALIASES.get(kind.strip(), kind.strip())
+        if kind not in KINDS:
+            print(f"警告：忽略未知的排除类型 {kind}", file=sys.stderr)
+            continue
+        excluded.add((kind, item_id.strip()))
     return excluded
 
 
@@ -53,7 +61,7 @@ def _write_item(
     item: ContentItem,
     client,
     state_dir: Path,
-) -> None:
+) -> list[str]:
     bundle = content_root / kind / item.id
     localizer = ImageLocalizer(client, bundle)
     localized_html, _, failed = localizer.localize(item.content_html)
@@ -62,6 +70,13 @@ def _write_item(
     body = html_to_markdown(localized_html)
     page = render_page(item, body, deleted=False, archived_at=date.today())
     (bundle / "index.md").write_text(page, encoding="utf-8")
+
+    raw_dir = state_dir / "raw" / kind
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    (raw_dir / f"{item.id}.json").write_text(
+        json.dumps(item.raw, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    return failed
 
 
 def _mark_deleted(content_root: Path, kind: str, item_id: str) -> bool:
@@ -96,6 +111,8 @@ def run_sync(
 ) -> SyncReport:
     content_root = Path(config["content_root"])
     state_dir = Path(config["state_dir"])
+    if not dry_run:
+        state_dir.mkdir(parents=True, exist_ok=True)
     url_token = state.url_token or config.get("url_token") or ""
     excluded = _load_excluded(state_dir)
     report = SyncReport()
@@ -118,34 +135,48 @@ def run_sync(
                     complete = False
                     break
                 known = f"{kind}:{item.id}" in state.items
-                if not state.needs_update(kind, item):
+                bundle_exists = (content_root / kind / item.id / "index.md").exists()
+                if not state.needs_update(kind, item) and bundle_exists:
                     continue
                 if dry_run:
                     report.added += 0 if known else 1
                     report.updated += 1 if known else 0
                     processed += 1
                     continue
-                detail = client.get_detail(kind, item.id)
-                if detail is None:
-                    report.failed += 1
-                    processed += 1
-                    _log(state_dir, f"detail not found {kind}:{item.id}")
-                    continue
                 try:
-                    _write_item(content_root, kind, detail, client, state_dir)
-                except OSError as exc:
+                    needs_detail = getattr(item, "truncated", False) or not item.content_html.strip()
+                    detail = client.get_detail(kind, item.id) if needs_detail else item
+                    if detail is None:
+                        report.failed += 1
+                        processed += 1
+                        _log(state_dir, f"detail not found {kind}:{item.id}")
+                        continue
+                    failed_images = _write_item(
+                        content_root, kind, detail, client, state_dir
+                    )
+                    if failed_images:
+                        report.failed += 1
+                        processed += 1
+                        _log(
+                            state_dir,
+                            f"images pending retry {kind}:{item.id} count={len(failed_images)}",
+                        )
+                        continue
+                    state.record(kind, detail)
+                    report.added += 0 if known else 1
+                    report.updated += 1 if known else 0
+                    processed += 1
+                except (AuthError, RateLimitError):
+                    raise
+                except Exception as exc:
                     report.failed += 1
                     processed += 1
-                    _log(state_dir, f"write failed {kind}:{item.id} error={exc}")
-                    continue
-                state.record(kind, detail)
-                report.added += 0 if known else 1
-                report.updated += 1 if known else 0
-                processed += 1
+                    _log(state_dir, f"item failed {kind}:{item.id} error={exc}")
         except (AuthError, RateLimitError):
             raise
-        except Exception as exc:  # 单页异常不终止整轮，但不做删除判定
+        except Exception as exc:
             complete = False
+            report.incomplete = True
             _log(state_dir, f"list failed {kind} error={exc}")
 
         if not dry_run:

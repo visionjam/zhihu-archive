@@ -72,13 +72,15 @@ params:
   homeInfoParams:
     Title: "知乎归档"
     Content: "这里保存我在知乎发布的回答、想法与文章。内容按同步时的原样归档，部分条目可能已从知乎删除。"
+  footer:
+    text: "内容来自知乎，版权归作者所有 · [博客](https://visionjam.github.io/)"
   socialIcons:
     - name: github
       title: GitHub
       url: "https://github.com/visionjam"
     - name: rss
       title: RSS 订阅
-      url: "/index.xml"
+      url: "https://visionjam.github.io/zhihu-archive/index.xml"
   assets:
     disableHLJS: true
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
 
@@ -20,10 +20,34 @@ class ContentItem:
     voteup_count: int
     comment_count: int
     tags: list[str]
+    summary: str = ""
+    truncated: bool = False
+    raw: dict = field(default_factory=dict, repr=False)
 
 
-def _datetime(timestamp: int | float | None) -> datetime:
-    return datetime.fromtimestamp(int(timestamp or 0), tz=timezone.utc)
+def _datetime(value: int | float | str | None) -> datetime:
+    if isinstance(value, str):
+        if value.isdigit():
+            value = int(value)
+        else:
+            try:
+                return datetime.fromisoformat(value.replace("Z", "+00:00"))
+            except ValueError:
+                return datetime.fromtimestamp(0, tz=timezone.utc)
+    return datetime.fromtimestamp(int(value or 0), tz=timezone.utc)
+
+
+def _created(raw: dict) -> datetime:
+    return _datetime(raw.get("created_time") or raw.get("created"))
+
+
+def _updated(raw: dict) -> datetime:
+    return _datetime(
+        raw.get("updated_time")
+        or raw.get("updated")
+        or raw.get("created_time")
+        or raw.get("created")
+    )
 
 
 def _tags(raw: dict) -> list[str]:
@@ -57,7 +81,7 @@ def _pin_blocks(blocks: list[dict] | None) -> str:
 def item_from_answer(raw: dict) -> ContentItem:
     question = raw.get("question") or {}
     question_title = question.get("title") or ""
-    created = _datetime(raw.get("created_time"))
+    created = _created(raw)
     fallback = f"回答 · {created:%Y-%m-%d}"
     return ContentItem(
         kind="answers",
@@ -66,16 +90,19 @@ def item_from_answer(raw: dict) -> ContentItem:
         question=question_title or None,
         url=f"https://www.zhihu.com/question/{question.get('id')}/answer/{raw['id']}",
         created=created,
-        updated=_datetime(raw.get("updated_time") or raw.get("created_time")),
+        updated=_updated(raw),
         content_html=raw.get("content") or "",
         voteup_count=int(raw.get("voteup_count") or 0),
         comment_count=int(raw.get("comment_count") or 0),
         tags=_tags(raw),
+        summary=raw.get("excerpt") or "",
+        truncated=bool(raw.get("content_need_truncated")),
+        raw=raw,
     )
 
 
 def item_from_article(raw: dict) -> ContentItem:
-    created = _datetime(raw.get("created_time"))
+    created = _created(raw)
     title = raw.get("title") or f"文章 · {created:%Y-%m-%d}"
     return ContentItem(
         kind="articles",
@@ -84,16 +111,19 @@ def item_from_article(raw: dict) -> ContentItem:
         question=None,
         url=f"https://zhuanlan.zhihu.com/p/{raw['id']}",
         created=created,
-        updated=_datetime(raw.get("updated_time") or raw.get("created_time")),
+        updated=_updated(raw),
         content_html=raw.get("content") or "",
         voteup_count=int(raw.get("voteup_count") or 0),
         comment_count=int(raw.get("comment_count") or 0),
         tags=_tags(raw),
+        summary=raw.get("excerpt") or "",
+        truncated=bool(raw.get("content_need_truncated")),
+        raw=raw,
     )
 
 
 def item_from_pin(raw: dict) -> ContentItem:
-    created = _datetime(raw.get("created_time"))
+    created = _created(raw)
     html = _pin_blocks(raw.get("content"))
     origin = raw.get("origin_pin")
     if origin:
@@ -107,11 +137,14 @@ def item_from_pin(raw: dict) -> ContentItem:
         question=None,
         url=f"https://www.zhihu.com/pin/{raw['id']}",
         created=created,
-        updated=_datetime(raw.get("updated_time") or raw.get("created_time")),
+        updated=_updated(raw),
         content_html=html,
         voteup_count=int(raw.get("voteup_count") or 0),
         comment_count=int(raw.get("comment_count") or 0),
         tags=_tags(raw),
+        summary=_plain_text(html)[:140],
+        truncated=bool(raw.get("content_need_truncated")),
+        raw=raw,
     )
 
 

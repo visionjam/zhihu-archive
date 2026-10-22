@@ -19,7 +19,11 @@ class CookieFormatError(ValueError):
 def _parse_netscape(text: str) -> list[tuple[str, str, str]]:
     rows: list[tuple[str, str, str]] = []
     for line in text.splitlines():
-        if not line.strip() or line.startswith("#"):
+        if not line.strip():
+            continue
+        if line.startswith("#HttpOnly_"):
+            line = line[len("#HttpOnly_") :]
+        elif line.startswith("#"):
             continue
         fields = line.split("\t")
         if len(fields) >= 7:

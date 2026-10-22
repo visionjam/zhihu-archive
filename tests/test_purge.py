@@ -3,6 +3,7 @@ import pytest
 from zhihu_archive.purge import (
     build_filter_branch_command,
     build_filter_repo_command,
+    build_force_push_command,
     content_path,
     ensure_archive_repo,
 )
@@ -11,6 +12,23 @@ from zhihu_archive.purge import (
 def test_content_path_rejects_unknown_kind():
     with pytest.raises(ValueError):
         content_path("comments", "1")
+
+
+@pytest.mark.parametrize("bad_id", ["../1", "1/2", "1\\2", "1\n2", "abc"])
+def test_content_path_rejects_unsafe_id(bad_id):
+    with pytest.raises(ValueError):
+        content_path("answers", bad_id)
+
+
+def test_force_push_command_pins_old_sha():
+    command = build_force_push_command("abc123")
+    assert command == [
+        "git",
+        "push",
+        "--force-with-lease=main:abc123",
+        "origin",
+        "main",
+    ]
 
 
 def test_purge_rejects_non_archive_repo(tmp_path):

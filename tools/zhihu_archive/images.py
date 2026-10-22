@@ -42,12 +42,17 @@ class ImageLocalizer:
         cache: dict[str, str] = {}
 
         for image in soup.find_all("img"):
-            source = image.get("src") or ""
+            source = ""
+            for attribute in ("data-original", "data-actualsrc", "data-src", "src"):
+                candidate = image.get(attribute) or ""
+                if candidate and not candidate.startswith("data:"):
+                    source = candidate
+                    break
             if not source:
                 continue
             if source.startswith("//"):
                 source = "https:" + source
-                image["src"] = source
+            image["src"] = source
             if source in cache:
                 image["src"] = cache[source]
                 continue

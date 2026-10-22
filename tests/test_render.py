@@ -1,3 +1,4 @@
+from dataclasses import replace
 from datetime import date, datetime, timezone
 
 from zhihu_archive.models import ContentItem
@@ -33,6 +34,21 @@ def test_equation_span_becomes_tex():
     assert "$x^2+y^2=1$" in html_to_markdown(html)
 
 
+def test_data_uri_placeholder_images_are_removed():
+    html = '<p>文字<img src="data:image/svg+xml;utf8,<svg></svg>"></p>'
+    md = html_to_markdown(html)
+    assert "data:image" not in md
+    assert "文字" in md
+
+
+def test_absolute_zhihu_link_target_decoded():
+    html = (
+        '<p><a href="https://link.zhihu.com/?target=https%3A%2F%2Fexample.com">'
+        "链接</a></p>"
+    )
+    assert "https://example.com" in html_to_markdown(html)
+
+
 def test_relative_links_become_absolute():
     html = '<p><a href="/question/1">问题</a></p>'
     assert "https://www.zhihu.com/question/1" in html_to_markdown(html)
@@ -48,6 +64,15 @@ def test_deleted_banner_and_original_link():
     assert "该内容已从知乎删除" in page
     assert "https://www.zhihu.com/question/123/answer/456" in page
     assert "archived_at: 2026-10-22" in page
+
+
+def test_summary_contains_type_and_deleted_marker():
+    item = replace(ITEM, summary="一段摘要")
+    fm = build_front_matter(item, True, date(2026, 10, 22))
+    assert "summary:" in fm
+    assert "已从知乎删除" in fm
+    assert "回答" in fm
+    assert "一段摘要" in fm
 
 
 def test_math_front_matter_when_body_has_math():

@@ -29,6 +29,23 @@ def test_allowlist_cannot_suppress_hard(tmp_path):
     assert not report.ok
 
 
+def test_windows_path_is_review_not_hard(tmp_path):
+    (tmp_path / "a.md").write_text(r"示例 C:\Windows\System32", encoding="utf-8")
+    report = scan_paths(tmp_path, ["a.md"], set())
+    assert report.hard == []
+    assert report.review and not report.ok
+
+
+def test_allowlist_checks_every_match_on_a_line(tmp_path):
+    (tmp_path / "a.md").write_text(
+        "a@example.com and secret@example.com", encoding="utf-8"
+    )
+    allow = {"email\ta.md\ta@example.com"}
+    report = scan_paths(tmp_path, ["a.md"], allow)
+    assert not report.ok
+    assert any("secret@example.com" in finding.text for finding in report.review)
+
+
 def test_images_are_listed(tmp_path):
     (tmp_path / "a.png").write_bytes(b"png")
     report = scan_paths(tmp_path, ["a.png"], set())

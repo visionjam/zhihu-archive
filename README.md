@@ -25,11 +25,11 @@ hugo server -D
 
 ## 环境
 
-- Python 3.11+，依赖：`requests`、`beautifulsoup4`、`markdownify`、`pytest`。
+- Python 3.11+，依赖见 `requirements.txt`。
 - Hugo 0.168.0 extended。
 
 ```bash
-python -m pip install requests beautifulsoup4 markdownify pytest
+python -m pip install -r requirements.txt
 ```
 
 ## 准备 Cookie
@@ -55,6 +55,7 @@ python tools/sync.py --dry-run --limit 3   # 小样本检查，不写文件
 python tools/sync.py                       # 全量或增量；写文件、扫描、提交、推送
 python tools/sync.py --no-push             # 本地提交，不推送
 python tools/sync.py --types answers,pins  # 只同步部分类型
+python tools/sync.py --yes-images          # 确认本轮新增/修改的图片可以公开
 ```
 
 首次全量受知乎接口限速影响（每次请求随机等待 2–5 秒），内容多时需要较长时间；中断后重跑即可续跑。
@@ -64,17 +65,17 @@ python tools/sync.py --types answers,pins  # 只同步部分类型
 Windows 任务计划程序（在仓库根目录执行）：
 
 ```bat
-schtasks /Create /SC DAILY /TN "ZhihuArchiveSync" /TR "\"%CD%\sync.bat\"" /ST 09:00
+schtasks /Create /SC DAILY /TN "ZhihuArchiveSync" /TR "\"%CD%\sync.bat\" --scheduled" /ST 09:00
 ```
 
-电脑开机时才运行；失败会记录到 `.local\logs\`。也可以直接双击 `sync.bat`。
+`--scheduled` 让脚本不等待按键，适合任务计划；手动双击 `sync.bat` 则会在结束时暂停。电脑开机时才运行；失败会记录到 `.local\logs\`。
 
 ## 隐私与撤回
 
 - 每次推送前自动扫描 `content/`：Cookie/密钥/本机路径/代理配置为硬拦截；电话、邮箱、内网地址等列为需确认。
 - 需确认项在人工核对后写入 `.local/scan-allowlist.txt`（仅本机、不入库），格式：`类型<TAB>相对路径<TAB>匹配串`。
-- 临时不公开某条：把 `回答:ID`、`文章:ID` 或 `想法:ID` 写入 `.local/exclude.txt`，下一轮同步会把它从站点移除（本地原始数据仍保留）。
-- 彻底撤回（连同公开 git 历史）：`python tools/purge.py --kind answers --id <ID>`。该操作会重写历史并 force-push，执行前必须输入仓库目录名确认；他人已有的 fork/clone 与平台缓存不在保证范围内。
+- 临时不公开某条：把 `回答:ID`、`文章:ID` 或 `想法:ID`（也接受 `answers:`、`articles:`、`pins:`）写入 `.local/exclude.txt`，下一轮同步会把它从站点移除（`.local/raw/` 中的原始 JSON 仍保留）。
+- 彻底撤回（连同公开 git 历史）：`python tools/purge.py --kind answers --id <ID>`。该操作会重写历史并用 `--force-with-lease=<旧 SHA>` 推送，执行前必须输入仓库目录名确认；他人已有的 fork/clone 与平台缓存不在保证范围内。
 
 ## 测试
 

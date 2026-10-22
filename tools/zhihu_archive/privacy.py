@@ -12,7 +12,6 @@ HARD_PATTERNS = [
     ("api_key", re.compile(r"\bsk-[A-Za-z0-9_-]{10,}")),
     ("aws_key", re.compile(r"\bAKIA[0-9A-Z]{16}\b")),
     ("private_key", re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----")),
-    ("windows_path", re.compile(r"\b[A-Za-z]:[\\/]")),
     ("unc_path", re.compile(r"\\\\[A-Za-z0-9_.-]+\\[A-Za-z0-9_.$-]+")),
     (
         "proxy_config",
@@ -21,6 +20,7 @@ HARD_PATTERNS = [
 ]
 
 REVIEW_PATTERNS = [
+    ("windows_path", re.compile(r"\b[A-Za-z]:[\\/]")),
     ("local_address", re.compile(r"\b(?:127\.0\.0\.1|localhost)\b", re.IGNORECASE)),
     (
         "private_ip",
@@ -86,15 +86,13 @@ def _scan_text(text: str, relative: str, allowlist: set[str]) -> tuple[list[Find
             if pattern.search(line):
                 hard.append(Finding(relative, line_number, kind, "hard", line.strip()[:160]))
         for kind, pattern in REVIEW_PATTERNS:
-            match = pattern.search(line)
-            if not match:
-                continue
-            key = f"{kind}\t{relative}\t{match.group(0)}"
-            if key in allowlist:
-                continue
-            review.append(
-                Finding(relative, line_number, kind, "review", line.strip()[:160])
-            )
+            for match in pattern.finditer(line):
+                key = f"{kind}\t{relative}\t{match.group(0)}"
+                if key in allowlist:
+                    continue
+                review.append(
+                    Finding(relative, line_number, kind, "review", line.strip()[:160])
+                )
     return hard, review
 
 

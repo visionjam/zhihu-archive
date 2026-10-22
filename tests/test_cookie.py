@@ -14,6 +14,11 @@ def test_extract_netscape_keeps_only_zhihu():
     assert extract_cookie(NETSCAPE) == "z_c0=TOKEN"
 
 
+def test_extract_netscape_httponly_prefix():
+    text = "#HttpOnly_.zhihu.com\tTRUE\t/\tTRUE\t1999999999\tz_c0\tTOKEN\n"
+    assert extract_cookie(text) == "z_c0=TOKEN"
+
+
 def test_extract_curl_header():
     text = """curl 'https://www.zhihu.com/' -H 'cookie: z_c0=TOKEN; d_c0=DEVICE'"""
     assert extract_cookie(text) == "z_c0=TOKEN; d_c0=DEVICE"

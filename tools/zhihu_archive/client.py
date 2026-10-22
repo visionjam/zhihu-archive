@@ -12,7 +12,6 @@ from .models import ContentItem, item_from_raw
 
 BASE = "https://www.zhihu.com"
 
-DETAIL_KIND = {"answers": "answer", "articles": "article", "pins": "pin"}
 INCLUDE_FIELDS = {
     "answers": (
         "data[*].content,excerpt,created_time,updated_time,voteup_count,"
@@ -24,6 +23,20 @@ INCLUDE_FIELDS = {
     ),
     "pins": (
         "data[*].content,created_time,updated_time,voteup_count,"
+        "comment_count,topics.name,origin_pin"
+    ),
+}
+DETAIL_INCLUDE = {
+    "answers": (
+        "content,excerpt,created_time,updated_time,voteup_count,"
+        "comment_count,question.title,question.id,topics.name"
+    ),
+    "articles": (
+        "content,excerpt,created_time,updated_time,voteup_count,"
+        "comment_count,topics.name"
+    ),
+    "pins": (
+        "content,created_time,updated_time,voteup_count,"
         "comment_count,topics.name,origin_pin"
     ),
 }
@@ -62,6 +75,7 @@ class ZhihuClient:
         retries: int = 3,
         backoff: float = 2.0,
         timeout: float = 20.0,
+        download_session: requests.Session | None = None,
     ) -> None:
         self.cookie = cookie
         self.delay = delay
@@ -70,6 +84,10 @@ class ZhihuClient:
         self.timeout = timeout
         self.session = session or requests.Session()
         self.session.headers.update(self._headers())
+        # 图片可能来自任意外链主机，必须使用不带 Cookie 的独立会话。
+        self.download_session = download_session or requests.Session()
+        self.download_session.headers.setdefault("User-Agent", USER_AGENT)
+        self.download_session.headers.setdefault("Referer", "https://www.zhihu.com/")
 
     def _headers(self) -> dict[str, str]:
         return {
@@ -90,7 +108,13 @@ class ZhihuClient:
         last_status = None
         for attempt in range(self.retries):
             self._sleep()
-            response = self.session.get(url, params=params, timeout=self.timeout)
+            try:
+                response = self.session.get(url, params=params, timeout=self.timeout)
+            except requests.RequestException as exc:
+                if attempt + 1 < self.retries:
+                    time.sleep(self.backoff * (2**attempt))
+                    continue
+                raise ApiError(f"网络错误，重试 {self.retries} 次仍失败：{url}") from exc
             status = response.status_code
             if status == 200:
                 return response.json()
@@ -118,7 +142,7 @@ class ZhihuClient:
         }
 
     def iter_items(self, kind: str, url_token: str, limit: int = 20) -> Iterator[ContentItem]:
-        if kind not in DETAIL_KIND:
+        if kind not in INCLUDE_FIELDS:
             raise ValueError(f"未知内容类型：{kind}")
         offset = 0
         while True:
@@ -130,22 +154,28 @@ class ZhihuClient:
                     "offset": offset,
                 },
             )
+            paging = data.get("paging")
+            if not isinstance(paging, dict) or "is_end" not in paging:
+                raise ApiError("列表接口缺少分页信息，本轮不做完整扫描。")
             for raw in data.get("data") or []:
                 yield item_from_raw(kind, raw)
-            if data.get("paging", {}).get("is_end", True):
+            if paging["is_end"]:
                 break
             offset += limit
 
     def get_detail(self, kind: str, item_id: str) -> ContentItem | None:
         try:
-            raw = self.get_json(f"/api/v4/{DETAIL_KIND[kind]}/{item_id}")
+            raw = self.get_json(
+                f"/api/v4/{kind}/{item_id}",
+                params={"include": DETAIL_INCLUDE[kind]},
+            )
         except NotFoundError:
             return None
         return item_from_raw(kind, raw)
 
     def download(self, url: str) -> tuple[bytes, str]:
         """下载图片等静态资源；CDN 请求不套用接口的 2–5 秒限速。"""
-        response = self.session.get(url, timeout=self.timeout)
+        response = self.download_session.get(url, timeout=self.timeout)
         if response.status_code != 200:
             raise OSError(f"HTTP {response.status_code}: {url}")
         headers = getattr(response, "headers", {}) or {}

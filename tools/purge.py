@@ -15,6 +15,7 @@ from zhihu_archive.purge import (
     KINDS,
     build_filter_branch_command,
     build_filter_repo_command,
+    build_force_push_command,
     content_path,
     ensure_archive_repo,
 )
@@ -22,7 +23,13 @@ from zhihu_archive.purge import (
 
 def git(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        ["git", *args], cwd=str(root), check=True, capture_output=True, text=True
+        ["git", *args],
+        cwd=str(root),
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
     )
 
 
@@ -47,7 +54,6 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--kind", required=True, choices=KINDS)
     parser.add_argument("--id", required=True, dest="item_id")
     parser.add_argument("--root", default=".", help="归档仓库根目录")
-    parser.add_argument("--yes", action="store_true", help="跳过交互确认")
     args = parser.parse_args(argv)
 
     root = Path(args.root).resolve()
@@ -55,16 +61,17 @@ def main(argv: list[str] | None = None) -> int:
     path = content_path(args.kind, args.item_id)
     key = f"{args.kind}:{args.item_id}"
 
+    remote_url = git(root, "remote", "get-url", "origin").stdout.strip()
+    old_sha = git(root, "rev-parse", "HEAD").stdout.strip()
     commit_count = git(root, "rev-list", "--count", "HEAD").stdout.strip()
     print(f"仓库：{root}")
     print(f"将删除：{path}")
     print(f"将重写历史：{commit_count} 个提交")
-    print("远端：origin/main（force-with-lease）")
-    if not args.yes:
-        answer = input(f"确认请输入仓库目录名（{root.name}）：").strip()
-        if answer != root.name:
-            print("已取消。", file=sys.stderr)
-            return 1
+    print(f"远端：{remote_url}（origin/main，force-with-lease={old_sha[:7]}）")
+    answer = input(f"确认请输入仓库目录名（{root.name}）：").strip()
+    if answer != root.name:
+        print("已取消。", file=sys.stderr)
+        return 1
 
     add_exclusion(root, key)
     shutil.rmtree(root / path, ignore_errors=True)
@@ -85,7 +92,21 @@ def main(argv: list[str] | None = None) -> int:
     if not has_filter_repo:
         print("提示：未安装 git-filter-repo，改用 git filter-branch（较慢）。")
     subprocess.run(command, cwd=str(root), check=True)
-    git(root, "push", "--force-with-lease", "origin", "main")
+
+    remote_exists = subprocess.run(
+        ["git", "remote", "get-url", "origin"],
+        cwd=str(root),
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    if remote_exists.returncode != 0:
+        git(root, "remote", "add", "origin", remote_url)
+
+    subprocess.run(
+        build_force_push_command(old_sha), cwd=str(root), check=True
+    )
     print(f"已撤回 {key}，历史已重写并推送。")
     return 0
 

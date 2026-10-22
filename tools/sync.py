@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from zhihu_archive.client import AuthError, RateLimitError, ZhihuClient
 from zhihu_archive.cookie import CookieFormatError, load_cookie
-from zhihu_archive.privacy import load_allowlist, scan_paths
+from zhihu_archive.privacy import IMAGE_EXTS, load_allowlist, scan_paths
 from zhihu_archive.state import SyncState
 from zhihu_archive.sync import KINDS, SyncReport, run_sync
 
@@ -23,7 +23,13 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def run_git(root: Path, *args: str) -> None:
     subprocess.run(
-        ["git", *args], cwd=str(root), check=True, capture_output=True, text=True
+        ["git", *args],
+        cwd=str(root),
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
     )
 
 
@@ -34,12 +40,31 @@ def staged_changes(root: Path) -> bool:
     return result.returncode != 0
 
 
+def staged_image_paths(root: Path) -> list[str]:
+    result = subprocess.run(
+        ["git", "diff", "--cached", "--name-only", "--diff-filter=AM"],
+        cwd=str(root),
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    if result.returncode != 0:
+        return []
+    return [
+        line.strip()
+        for line in result.stdout.splitlines()
+        if Path(line.strip()).suffix.lower() in IMAGE_EXTS
+    ]
+
+
 def publish_if_clean(
     root: Path,
     content_root: Path,
     state_dir: Path,
     report: SyncReport,
     push: bool,
+    images_approved: bool = False,
 ) -> bool:
     root = Path(root).resolve()
     allowlist = load_allowlist(Path(state_dir) / "scan-allowlist.txt")
@@ -57,6 +82,15 @@ def publish_if_clean(
         return False
 
     run_git(root, "add", "content")
+    images = staged_image_paths(root)
+    if images and not images_approved:
+        print(f"新增/修改图片 {len(images)} 张，需人工确认：")
+        for image in images[:10]:
+            print(f"  {image}")
+        if len(images) > 10:
+            print(f"  ... 其余 {len(images) - 10} 张")
+        print("确认后使用 --yes-images 重新运行。")
+        return False
     if staged_changes(root):
         message = (
             f"sync: {date.today():%Y-%m-%d} "
@@ -89,6 +123,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--sample", type=int, default=0, help="每种类型只打印 N 条标题")
     parser.add_argument("--dry-run", action="store_true", help="只计算，不写文件")
     parser.add_argument("--no-push", action="store_true", help="本地提交但不推送远端")
+    parser.add_argument(
+        "--yes-images", action="store_true", help="确认新增/修改的图片可以公开"
+    )
     parser.add_argument(
         "--types",
         default="answers,articles,pins",
@@ -155,6 +192,12 @@ def main(argv: list[str] | None = None) -> int:
 
     if not args.dry_run:
         state.save(state_dir / "state.json")
+        if report.incomplete:
+            print(
+                "ERROR: 本轮列表抓取不完整，已写入本地但未推送；请稍后重试。",
+                file=sys.stderr,
+            )
+            return 4
         try:
             published = publish_if_clean(
                 ROOT,
@@ -162,6 +205,7 @@ def main(argv: list[str] | None = None) -> int:
                 state_dir,
                 report,
                 push=not args.no_push,
+                images_approved=args.yes_images,
             )
         except subprocess.CalledProcessError as exc:
             print(f"ERROR: git 操作失败：{exc}", file=sys.stderr)

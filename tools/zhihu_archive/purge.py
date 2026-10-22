@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 KINDS = ("answers", "articles", "pins")
@@ -10,7 +11,19 @@ KINDS = ("answers", "articles", "pins")
 def content_path(kind: str, item_id: str) -> str:
     if kind not in KINDS:
         raise ValueError(f"未知内容类型：{kind}")
+    if not re.fullmatch(r"\d+", item_id):
+        raise ValueError(f"不合法的内容 ID：{item_id}")
     return f"content/{kind}/{item_id}"
+
+
+def build_force_push_command(old_sha: str) -> list[str]:
+    return [
+        "git",
+        "push",
+        f"--force-with-lease=main:{old_sha}",
+        "origin",
+        "main",
+    ]
 
 
 def ensure_archive_repo(root: Path) -> None:

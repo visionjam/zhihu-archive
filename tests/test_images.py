@@ -48,6 +48,17 @@ def test_failed_image_keeps_url(tmp_path):
     assert "https://pic1.zhimg.com/missing.png" in new_html
 
 
+def test_lazy_loaded_image_uses_real_source(tmp_path):
+    html = (
+        '<img src="data:image/svg+xml;utf8,<svg></svg>" '
+        'data-original="https://pic1.zhimg.com/a.png">'
+    )
+    client = FakeClient({"https://pic1.zhimg.com/a.png": (b"aaa", "image/png")})
+    new_html, saved, failed = ImageLocalizer(client, tmp_path).localize(html)
+    assert len(saved) == 1 and failed == []
+    assert "./" in new_html
+
+
 def test_protocol_relative_image_is_fetched(tmp_path):
     html = '<img src="//pic1.zhimg.com/a.png">'
     client = FakeClient({"https://pic1.zhimg.com/a.png": (b"aaa", "image/png")})

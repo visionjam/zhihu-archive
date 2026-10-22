@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from zhihu_archive.client import ZhihuClient
+from zhihu_archive.client import ApiError, ZhihuClient
 from zhihu_archive.models import item_from_answer, item_from_article, item_from_pin
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -63,6 +63,24 @@ def test_pin_repost_keeps_own_text_and_quote():
     assert item.url == "https://www.zhihu.com/pin/789"
 
 
+def test_article_uses_created_and_updated_fields():
+    raw = load("article.json")
+    raw["created"] = raw.pop("created_time")
+    raw["updated"] = raw.pop("updated_time")
+    item = item_from_article(raw)
+    assert item.created.year == 2019
+    assert item.updated.year == 2019
+
+
+def test_pin_uses_created_and_updated_fields():
+    raw = load("pin_repost.json")
+    raw["created"] = raw.pop("created_time")
+    raw["updated"] = raw.pop("updated_time")
+    item = item_from_pin(raw)
+    assert item.created.year == 2019
+    assert item.updated.year == 2019
+
+
 def test_pin_without_origin_still_maps():
     raw = {
         "id": 790,
@@ -93,6 +111,34 @@ def test_get_detail_maps_answer():
     client = ZhihuClient("z_c0=x", session=session, delay=(0, 0))
     item = client.get_detail("answers", "456")
     assert item.title == "问题标题一"
+
+
+@pytest.mark.parametrize(
+    "kind,fixture,item_id",
+    [
+        ("answers", "answers_page1.json", "456"),
+        ("articles", "article.json", "111"),
+        ("pins", "pin_repost.json", "789"),
+    ],
+)
+def test_get_detail_uses_plural_endpoint_and_content_include(kind, fixture, item_id):
+    raw = load(fixture)
+    if kind == "answers":
+        raw = raw["data"][0]
+    session = FakeSession([FakeResponse(200, raw)])
+    client = ZhihuClient("z_c0=x", session=session, delay=(0, 0))
+    item = client.get_detail(kind, item_id)
+    assert session.calls[-1] == f"https://www.zhihu.com/api/v4/{kind}/{item_id}"
+    assert "content" in session.params[-1]["include"]
+    assert item.content_html
+
+
+def test_missing_paging_raises_api_error():
+    raw = load("answers_page1.json")["data"][0]
+    session = FakeSession([FakeResponse(200, {"data": [raw]})])
+    client = ZhihuClient("z_c0=x", session=session, delay=(0, 0))
+    with pytest.raises(ApiError):
+        list(client.iter_items("answers", "token"))
 
 
 def test_get_detail_404_returns_none():
