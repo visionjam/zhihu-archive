@@ -5,17 +5,67 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
+from datetime import date
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from zhihu_archive.client import AuthError, RateLimitError, ZhihuClient
 from zhihu_archive.cookie import CookieFormatError, load_cookie
+from zhihu_archive.privacy import load_allowlist, scan_paths
 from zhihu_archive.state import SyncState
-from zhihu_archive.sync import KINDS, run_sync
+from zhihu_archive.sync import KINDS, SyncReport, run_sync
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def run_git(root: Path, *args: str) -> None:
+    subprocess.run(
+        ["git", *args], cwd=str(root), check=True, capture_output=True, text=True
+    )
+
+
+def staged_changes(root: Path) -> bool:
+    result = subprocess.run(
+        ["git", "diff", "--cached", "--quiet"], cwd=str(root), capture_output=True
+    )
+    return result.returncode != 0
+
+
+def publish_if_clean(
+    root: Path,
+    content_root: Path,
+    state_dir: Path,
+    report: SyncReport,
+    push: bool,
+) -> bool:
+    root = Path(root).resolve()
+    allowlist = load_allowlist(Path(state_dir) / "scan-allowlist.txt")
+    try:
+        relative = Path(content_root).resolve().relative_to(root).as_posix()
+    except ValueError:
+        relative = str(content_root)
+    scan = scan_paths(root, [relative], allowlist)
+
+    for finding in scan.hard:
+        print(f"HARD  {finding.path}:{finding.line} [{finding.kind}] <hidden>")
+    for finding in scan.review:
+        print(f"REVIEW {finding.path}:{finding.line} [{finding.kind}] {finding.text[:80]}")
+    if not scan.ok:
+        return False
+
+    run_git(root, "add", "content")
+    if staged_changes(root):
+        message = (
+            f"sync: {date.today():%Y-%m-%d} "
+            f"(新增 {report.added} / 更新 {report.updated} / 删除标记 {report.marked_deleted})"
+        )
+        run_git(root, "commit", "-m", message)
+    if push:
+        run_git(root, "push", "origin", "main")
+    return True
 
 
 def parse_types(value: str) -> tuple[str, ...]:
@@ -38,7 +88,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--check", action="store_true", help="只验证 Cookie 与登录态")
     parser.add_argument("--sample", type=int, default=0, help="每种类型只打印 N 条标题")
     parser.add_argument("--dry-run", action="store_true", help="只计算，不写文件")
-    parser.add_argument("--no-push", action="store_true", help="写文件但不提交推送")
+    parser.add_argument("--no-push", action="store_true", help="本地提交但不推送远端")
     parser.add_argument(
         "--types",
         default="answers,articles,pins",
@@ -105,6 +155,23 @@ def main(argv: list[str] | None = None) -> int:
 
     if not args.dry_run:
         state.save(state_dir / "state.json")
+        try:
+            published = publish_if_clean(
+                ROOT,
+                Path(config["content_root"]),
+                state_dir,
+                report,
+                push=not args.no_push,
+            )
+        except subprocess.CalledProcessError as exc:
+            print(f"ERROR: git 操作失败：{exc}", file=sys.stderr)
+            return 1
+        if not published:
+            print(
+                "ERROR: 隐私扫描未通过，内容已写入本地但未提交。",
+                file=sys.stderr,
+            )
+            return 1
     print(
         f"完成：新增 {report.added} / 更新 {report.updated} / "
         f"删除标记 {report.marked_deleted} / 失败 {report.failed}"
