@@ -1,9 +1,18 @@
 # 知乎归档
 
-VisionJam 的知乎回答、想法与文章归档站。
+VisionJam 的知乎回答、想法与文章归档站。归档站与博客平行独立：博客负责写作，这里负责备份与展示。
 
-- 站点：<https://visionjam.github.io/zhihu-archive/>
+- 归档站：<https://visionjam.github.io/zhihu-archive/>
 - 博客：<https://visionjam.github.io/>
+- 参考项目：[ZhiHuArchive](https://github.com/L-M-Sherlock/ZhiHuArchive)
+
+## 它做什么
+
+- 同步本人在知乎发布的**回答、想法、文章**；想法转发按知乎页面呈现归档。
+- 每篇内容生成一个 page bundle，图片下载到本地，保留原文链接。
+- 已从知乎删除的内容继续保留，并在页面上标注。
+- 第一次全量、之后增量；中断后可续跑。
+- Cookie 只留本机，GitHub Actions 不持有任何凭证，只负责构建与部署。
 
 ## 本地预览
 
@@ -12,10 +21,67 @@ git submodule update --init --recursive
 hugo server -D
 ```
 
-## 同步
+生产构建：`hugo --minify --gc`。
+
+## 环境
+
+- Python 3.11+，依赖：`requests`、`beautifulsoup4`、`markdownify`、`pytest`。
+- Hugo 0.168.0 extended。
+
+```bash
+python -m pip install requests beautifulsoup4 markdownify pytest
+```
+
+## 准备 Cookie
+
+1. 浏览器登录知乎。
+2. 打开开发者工具 → Network → 刷新 → 右键任意 `zhihu.com` 请求 → Copy → **Copy as cURL**。
+3. 把整段文本保存到 `%USERPROFILE%\.config\zhihu-archive\cookie.txt`（也可用 `ZHIHU_COOKIE_FILE` 指定其他路径）。
+
+脚本支持 Netscape、cURL、`Cookie:` 头、JSON 导出和纯 cookie 字符串，会自动提取知乎域名下的 Cookie。
+
+验证：
 
 ```bash
 python tools/sync.py --check
 ```
 
-完整说明见后续运维文档。
+成功时输出 `OK: <昵称> (url_token=...)`，不会打印 Cookie 值。
+
+## 同步
+
+```bash
+python tools/sync.py --dry-run --limit 3   # 小样本检查，不写文件
+python tools/sync.py                       # 全量或增量；写文件、扫描、提交、推送
+python tools/sync.py --no-push             # 本地提交，不推送
+python tools/sync.py --types answers,pins  # 只同步部分类型
+```
+
+首次全量受知乎接口限速影响（每次请求随机等待 2–5 秒），内容多时需要较长时间；中断后重跑即可续跑。
+
+### 每日自动同步
+
+Windows 任务计划程序（在仓库根目录执行）：
+
+```bat
+schtasks /Create /SC DAILY /TN "ZhihuArchiveSync" /TR "\"%CD%\sync.bat\"" /ST 09:00
+```
+
+电脑开机时才运行；失败会记录到 `.local\logs\`。也可以直接双击 `sync.bat`。
+
+## 隐私与撤回
+
+- 每次推送前自动扫描 `content/`：Cookie/密钥/本机路径/代理配置为硬拦截；电话、邮箱、内网地址等列为需确认。
+- 需确认项在人工核对后写入 `.local/scan-allowlist.txt`（仅本机、不入库），格式：`类型<TAB>相对路径<TAB>匹配串`。
+- 临时不公开某条：把 `回答:ID`、`文章:ID` 或 `想法:ID` 写入 `.local/exclude.txt`，下一轮同步会把它从站点移除（本地原始数据仍保留）。
+- 彻底撤回（连同公开 git 历史）：`python tools/purge.py --kind answers --id <ID>`。该操作会重写历史并 force-push，执行前必须输入仓库目录名确认；他人已有的 fork/clone 与平台缓存不在保证范围内。
+
+## 测试
+
+```bash
+python -m pytest tests
+```
+
+## 内容与版权
+
+归档内容来自知乎，版权归作者所有。页面保留原文链接；第三方内容、商标与图片权利归各自权利人。
