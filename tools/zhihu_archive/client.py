@@ -4,10 +4,29 @@ from __future__ import annotations
 
 import random
 import time
+from collections.abc import Iterator
 
 import requests
 
+from .models import ContentItem, item_from_raw
+
 BASE = "https://www.zhihu.com"
+
+DETAIL_KIND = {"answers": "answer", "articles": "article", "pins": "pin"}
+INCLUDE_FIELDS = {
+    "answers": (
+        "data[*].content,excerpt,created_time,updated_time,voteup_count,"
+        "comment_count,question.title,question.id,topics.name"
+    ),
+    "articles": (
+        "data[*].content,excerpt,created_time,updated_time,voteup_count,"
+        "comment_count,topics.name"
+    ),
+    "pins": (
+        "data[*].content,created_time,updated_time,voteup_count,"
+        "comment_count,topics.name,origin_pin"
+    ),
+}
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
@@ -97,3 +116,29 @@ class ZhihuClient:
             "url_token": data.get("url_token"),
             "name": data.get("name"),
         }
+
+    def iter_items(self, kind: str, url_token: str, limit: int = 20) -> Iterator[ContentItem]:
+        if kind not in DETAIL_KIND:
+            raise ValueError(f"未知内容类型：{kind}")
+        offset = 0
+        while True:
+            data = self.get_json(
+                f"/api/v4/members/{url_token}/{kind}",
+                params={
+                    "include": INCLUDE_FIELDS[kind],
+                    "limit": limit,
+                    "offset": offset,
+                },
+            )
+            for raw in data.get("data") or []:
+                yield item_from_raw(kind, raw)
+            if data.get("paging", {}).get("is_end", True):
+                break
+            offset += limit
+
+    def get_detail(self, kind: str, item_id: str) -> ContentItem | None:
+        try:
+            raw = self.get_json(f"/api/v4/{DETAIL_KIND[kind]}/{item_id}")
+        except NotFoundError:
+            return None
+        return item_from_raw(kind, raw)

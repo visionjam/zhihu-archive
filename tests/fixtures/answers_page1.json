@@ -1,0 +1,29 @@
+{
+  "data": [
+    {
+      "id": 456,
+      "type": "answer",
+      "created_time": 1560000000,
+      "updated_time": 1560000100,
+      "voteup_count": 12,
+      "comment_count": 3,
+      "content": "<p>正文一</p>",
+      "excerpt": "正文一",
+      "question": {"id": 123, "title": "问题标题一"},
+      "topics": [{"name": "数学"}, {"name": "物理"}]
+    },
+    {
+      "id": 457,
+      "type": "answer",
+      "created_time": 1560000200,
+      "updated_time": 1560000200,
+      "voteup_count": 1,
+      "comment_count": 0,
+      "content": "<p>正文二</p>",
+      "excerpt": "正文二",
+      "question": {"id": 124, "title": "问题标题二"},
+      "topics": []
+    }
+  ],
+  "paging": {"is_end": false}
+}

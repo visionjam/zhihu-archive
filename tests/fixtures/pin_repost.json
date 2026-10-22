@@ -1,0 +1,12 @@
+{
+  "id": 789,
+  "type": "pin",
+  "created_time": 1560000000,
+  "updated_time": 1560000000,
+  "voteup_count": 2,
+  "comment_count": 0,
+  "content": [{"type": "text", "content": "我的转发评论"}],
+  "origin_pin": {
+    "content": [{"type": "text", "content": "被转发的原文"}]
+  }
+}
