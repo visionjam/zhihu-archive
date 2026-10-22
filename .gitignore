@@ -2,6 +2,9 @@
 public/
 resources/_gen/
 .hugo_build.lock
+.pytest_cache/
+__pycache__/
+*.pyc
 *.cookie
 cookie*.txt
 zhihu_cookie*
