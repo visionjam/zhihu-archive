@@ -73,7 +73,7 @@ params:
     Title: "知乎归档"
     Content: "这里保存我在知乎发布的回答、想法与文章。内容按同步时的原样归档，部分条目可能已从知乎删除。"
   footer:
-    text: "内容来自知乎，版权归作者所有 · [博客](https://visionjam.github.io/)"
+    text: "内容来自知乎，版权归作者所有 · [博客](https://visionjam.github.io/) · [归档站是怎么做的](https://visionjam.github.io/posts/zhihu-archive/)"
   socialIcons:
     - name: github
       title: GitHub
