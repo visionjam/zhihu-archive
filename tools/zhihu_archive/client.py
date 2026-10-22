@@ -142,3 +142,11 @@ class ZhihuClient:
         except NotFoundError:
             return None
         return item_from_raw(kind, raw)
+
+    def download(self, url: str) -> tuple[bytes, str]:
+        """下载图片等静态资源；CDN 请求不套用接口的 2–5 秒限速。"""
+        response = self.session.get(url, timeout=self.timeout)
+        if response.status_code != 200:
+            raise OSError(f"HTTP {response.status_code}: {url}")
+        headers = getattr(response, "headers", {}) or {}
+        return response.content, headers.get("Content-Type", "")
