@@ -1,0 +1,8 @@
+.local/
+public/
+resources/_gen/
+.hugo_build.lock
+*.cookie
+cookie*.txt
+zhihu_cookie*
+.env

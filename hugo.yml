@@ -1,0 +1,96 @@
+baseURL: "https://visionjam.github.io/zhihu-archive/"
+title: "知乎归档 · VisionJam"
+locale: "zh-cn"
+defaultContentLanguage: "zh"
+theme: ["PaperMod"]
+
+enableRobotsTXT: true
+buildDrafts: false
+buildFuture: false
+buildExpired: false
+enableEmoji: true
+pygmentsUseClasses: true
+
+pagination:
+  pagerSize: 20
+
+taxonomies:
+  tag: tags
+
+menu:
+  main:
+    - identifier: answers
+      name: 回答
+      url: /answers/
+      weight: 10
+    - identifier: pins
+      name: 想法
+      url: /pins/
+      weight: 20
+    - identifier: articles
+      name: 文章
+      url: /articles/
+      weight: 30
+    - identifier: tags
+      name: 标签
+      url: /tags/
+      weight: 40
+    - identifier: archives
+      name: 归档
+      url: /archives/
+      weight: 50
+    - identifier: search
+      name: 搜索
+      url: /search/
+      weight: 60
+    - identifier: blog
+      name: 博客
+      url: "https://visionjam.github.io/"
+      weight: 70
+
+params:
+  env: production
+  description: "VisionJam 的知乎回答、想法与文章归档。"
+  author: "VisionJam"
+  DateFormat: "2006-01-02"
+  mainSections:
+    - answers
+    - articles
+    - pins
+  defaultTheme: auto
+  ShowReadingTime: false
+  ShowShareButtons: false
+  ShowPostNavLinks: true
+  ShowBreadCrumbs: true
+  ShowCodeCopyButtons: true
+  ShowAllPagesInArchive: true
+  ShowPageNums: true
+  ShowToc: true
+  TocOpen: false
+  ShowWordCount: false
+  ShowRssButtonInSectionTermList: true
+  homeInfoParams:
+    Title: "知乎归档"
+    Content: "这里保存我在知乎发布的回答、想法与文章。内容按同步时的原样归档，部分条目可能已从知乎删除。"
+  socialIcons:
+    - name: github
+      title: GitHub
+      url: "https://github.com/visionjam"
+    - name: rss
+      title: RSS 订阅
+      url: "/index.xml"
+  assets:
+    disableHLJS: true
+
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON
+
+markup:
+  highlight:
+    noClasses: false
+    codeFences: true
+    guessSyntax: true
+    lineNos: false
