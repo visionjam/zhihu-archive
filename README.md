@@ -83,6 +83,10 @@ schtasks /Create /SC DAILY /TN "ZhihuArchiveSync" /TR "\"%CD%\sync.bat\" --sched
 python -m pytest tests
 ```
 
+## 状态
+
+- 2026-10-22：首次全量同步 100 条（回答 12 / 文章 3 / 想法 85），图片 75 张；站点已上线。
+
 ## 内容与版权
 
 归档内容来自知乎，版权归作者所有。页面保留原文链接；第三方内容、商标与图片权利归各自权利人。
