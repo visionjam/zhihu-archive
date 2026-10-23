@@ -35,6 +35,10 @@ menu:
       name: 博客
       url: "https://visionjam.github.io/"
       weight: 40
+    - identifier: about
+      name: 关于
+      url: /about/
+      weight: 50
 
 params:
   env: production
@@ -67,6 +71,9 @@ params:
     - name: github
       title: GitHub
       url: "https://github.com/visionjam"
+    - name: zhihu
+      title: 知乎
+      url: "https://www.zhihu.com/people/kong-qi-82-94"
     - name: rss
       title: RSS 订阅
       url: "https://visionjam.github.io/zhihu-archive/index.xml"
