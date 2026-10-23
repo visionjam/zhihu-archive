@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from html import unescape
 
 
 @dataclass
@@ -55,7 +56,8 @@ def _tags(raw: dict) -> list[str]:
 
 
 def _plain_text(html: str) -> str:
-    return re.sub(r"<[^>]+>", "", html).replace("&nbsp;", " ").strip()
+    text = re.sub(r"<[^>]*>?", "", html or "")
+    return unescape(text).replace("\xa0", " ").strip()
 
 
 def _pin_blocks(blocks: list[dict] | None) -> str:
@@ -95,7 +97,7 @@ def item_from_answer(raw: dict) -> ContentItem:
         voteup_count=int(raw.get("voteup_count") or 0),
         comment_count=int(raw.get("comment_count") or 0),
         tags=_tags(raw),
-        summary=raw.get("excerpt") or "",
+        summary=_plain_text(raw.get("excerpt") or ""),
         truncated=bool(raw.get("content_need_truncated")),
         raw=raw,
     )
@@ -116,7 +118,7 @@ def item_from_article(raw: dict) -> ContentItem:
         voteup_count=int(raw.get("voteup_count") or 0),
         comment_count=int(raw.get("comment_count") or 0),
         tags=_tags(raw),
-        summary=raw.get("excerpt") or "",
+        summary=_plain_text(raw.get("excerpt") or ""),
         truncated=bool(raw.get("content_need_truncated")),
         raw=raw,
     )

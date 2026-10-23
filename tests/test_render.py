@@ -1,7 +1,7 @@
 from dataclasses import replace
 from datetime import date, datetime, timezone
 
-from zhihu_archive.models import ContentItem
+from zhihu_archive.models import ContentItem, item_from_answer, item_from_article
 from zhihu_archive.render import build_front_matter, html_to_markdown, render_page
 
 ITEM = ContentItem(
@@ -78,3 +78,48 @@ def test_summary_contains_type_and_deleted_marker():
 def test_math_front_matter_when_body_has_math():
     page = render_page(ITEM, "公式 $x^2$", deleted=False, archived_at=date(2026, 10, 22))
     assert "math: true" in page
+
+
+def test_article_excerpt_strips_html_and_unescapes_entities():
+    raw = {
+        "id": 1,
+        "title": "标题",
+        "created": 1710000000,
+        "updated": 1710000000,
+        "excerpt": '摘要 <a href="http://example.com">链接</a>&nbsp;A &amp; B',
+        "topics": [],
+    }
+    item = item_from_article(raw)
+    assert "<a" not in item.summary
+    assert "链接" in item.summary
+    assert "&nbsp;" not in item.summary
+    assert "A & B" in item.summary
+
+
+def test_article_excerpt_with_unclosed_tag_is_cleaned():
+    raw = {
+        "id": 4,
+        "title": "标题",
+        "created": 1710000000,
+        "updated": 1710000000,
+        "excerpt": '前言 <a href="http://example.com/very/long',
+        "topics": [],
+    }
+    item = item_from_article(raw)
+    assert "<a" not in item.summary
+    assert "前言" in item.summary
+
+
+def test_answer_excerpt_strips_html():
+    raw = {
+        "id": 2,
+        "question": {"id": 3, "title": "问题"},
+        "created": 1710000000,
+        "updated": 1710000000,
+        "excerpt": "<p>回答 <b>重点</b></p>",
+        "topics": [],
+    }
+    item = item_from_answer(raw)
+    assert "<p>" not in item.summary
+    assert "<b>" not in item.summary
+    assert "重点" in item.summary

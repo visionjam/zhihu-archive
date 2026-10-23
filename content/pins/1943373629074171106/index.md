@@ -8,7 +8,7 @@ zhihu_url: "https://www.zhihu.com/pin/1943373629074171106"
 deleted: false
 archived_at: 2026-10-22
 tags: []
-summary: "想法 · 2025-08-25 · 大家都一样史[大笑]  为什么广西的分数线这么低？"
+summary: "想法 · 2025-08-25 · 大家都一样史[大笑] 为什么广西的分数线这么低？"
 ---
 
 大家都一样史[大笑]   

@@ -8,7 +8,7 @@ zhihu_url: "https://zhuanlan.zhihu.com/p/2028600737005846783"
 deleted: false
 archived_at: 2026-10-22
 tags: []
-summary: "文章 · 2026-04-17 · <a href=\"http://link.zhihu.com/?target=https%3A//github.com/NVIDIA/personaplex\" class=\" wrap external\" target=\"_blank\" rel=\"nofollow norefer"
+summary: "文章 · 2026-04-17"
 math: true
 ---
 
