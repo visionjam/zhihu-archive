@@ -84,3 +84,100 @@ body {
   border-left: 3px solid #b06a2c;
   background: rgba(176, 106, 44, 0.08);
 }
+
+/* 首页分类标签 */
+.type-tabs {
+  display: flex;
+  gap: 1.6rem;
+  margin: 0 0 1.6rem;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.type-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.type-tab {
+  flex: 0 0 auto;
+  padding: 0.55rem 0.1rem;
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  color: var(--secondary);
+  font-size: 15px;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.type-tab:hover {
+  color: var(--primary);
+}
+
+.type-tab.active {
+  color: var(--primary);
+  border-bottom-color: #2f5d8a;
+  font-weight: 600;
+}
+
+:root[data-theme="dark"] .type-tab.active {
+  border-bottom-color: #8fb8da;
+}
+
+/* 首页简介：收紧 PaperMod 默认 320px 最小高度，避免置顶/最新前出现大片空白 */
+.first-entry {
+  min-height: auto;
+  margin: var(--gap) 0 calc(var(--gap) * 1.2) 0;
+}
+
+/* 首页置顶与最新 */
+.home-section-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--secondary);
+  margin: 1.6rem 0 0.4rem;
+}
+
+.home-pinned {
+  margin-bottom: 0.8rem;
+}
+
+.pinned-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pinned-item {
+  padding: 0.65rem 0;
+  border-bottom: 1px dashed var(--border);
+}
+
+.pinned-item:last-child {
+  border-bottom: none;
+}
+
+.pinned-title {
+  font-weight: 600;
+}
+
+.pinned-desc {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--secondary);
+  font-size: 0.92rem;
+}
+
+.home-more {
+  margin: 1.2rem 0 0;
+  text-align: right;
+}
+
+.home-more a {
+  color: #2f5d8a;
+}
+
+:root[data-theme="dark"] .home-more a {
+  color: #8fb8da;
+}

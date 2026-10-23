@@ -19,34 +19,22 @@ taxonomies:
 
 menu:
   main:
-    - identifier: answers
-      name: 回答
-      url: /answers/
-      weight: 10
-    - identifier: pins
-      name: 想法
-      url: /pins/
-      weight: 20
-    - identifier: articles
-      name: 文章
-      url: /articles/
-      weight: 30
     - identifier: tags
       name: 标签
       url: /tags/
-      weight: 40
+      weight: 10
     - identifier: archives
       name: 归档
       url: /archives/
-      weight: 50
+      weight: 20
     - identifier: search
       name: 搜索
       url: /search/
-      weight: 60
+      weight: 30
     - identifier: blog
       name: 博客
       url: "https://visionjam.github.io/"
-      weight: 70
+      weight: 40
 
 params:
   env: production
@@ -57,6 +45,7 @@ params:
     - answers
     - articles
     - pins
+  homeLimit: 20
   defaultTheme: auto
   ShowReadingTime: false
   ShowShareButtons: false

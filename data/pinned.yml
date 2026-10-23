@@ -1,0 +1,9 @@
+# 主页置顶：按本文件顺序显示。
+# 把下面的 items: [] 替换成列表即可，例如：
+# items:
+#   - title: "一篇文章"
+#     url: "/articles/2028600737005846783/"
+#     description: "一句话说明（可省略）"
+#   - title: "博客注意事项"
+#     url: "https://visionjam.github.io/posts/zhihu-archive/"
+items: []

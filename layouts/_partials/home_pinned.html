@@ -1,0 +1,20 @@
+{{- with hugo.Data.pinned }}
+{{- with .items }}
+<section class="home-pinned">
+  <h2 class="home-section-title">置顶</h2>
+  <ul class="pinned-list">
+    {{- range . }}
+    {{- $external := findRE `^(https?:)?//` .url }}
+    {{- $href := .url }}
+    {{- if not $external }}{{ $href = strings.TrimPrefix "/" .url | relURL }}{{ end }}
+    <li class="pinned-item">
+      <a class="pinned-title" href="{{ $href }}"{{ if $external }} target="_blank" rel="noopener"{{ end }}>{{ .title }}</a>
+      {{- with .description }}
+      <span class="pinned-desc">{{ . }}</span>
+      {{- end }}
+    </li>
+    {{- end }}
+  </ul>
+</section>
+{{- end }}
+{{- end }}

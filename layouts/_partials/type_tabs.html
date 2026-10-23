@@ -1,0 +1,12 @@
+{{- $items := slice
+  (dict "label" "主页" "href" site.Home.RelPermalink "active" .IsHome)
+  (dict "label" "全部" "href" ("all/" | relURL) "active" (and (eq .Kind "section") (eq .Section "all")))
+  (dict "label" "回答" "href" ("answers/" | relURL) "active" (and (eq .Kind "section") (eq .Section "answers")))
+  (dict "label" "文章" "href" ("articles/" | relURL) "active" (and (eq .Kind "section") (eq .Section "articles")))
+  (dict "label" "想法" "href" ("pins/" | relURL) "active" (and (eq .Kind "section") (eq .Section "pins")))
+-}}
+<nav class="type-tabs" aria-label="内容分类">
+  {{- range $items }}
+  <a class="type-tab{{ if .active }} active{{ end }}" href="{{ .href }}"{{ if .active }} aria-current="page"{{ end }}>{{ .label }}</a>
+  {{- end }}
+</nav>
