@@ -20,6 +20,16 @@ VisionJam 的知乎回答、想法与文章归档站。归档站与博客平行�
 - 「主页」只列最新的回答和文章（默认 20 条，可用 `params.homeLimit` 调整）；「全部」把回答、文章、想法混排。
 - 置顶内容在 `data/pinned.yml` 中维护，按文件顺序显示在主页简介下方，支持站内路径和外部链接。同步会重写文章 front matter，所以置顶不要写在文章里。
 
+## 站点结构（自定义部分）
+
+- `layouts/list.html`：首页/栏目页布局覆盖——首页截取最新 `params.homeLimit` 条回答+文章，`/all/` 混排三类。
+- `layouts/_partials/type_tabs.html`：首页与各列表页顶部的分类标签。
+- `layouts/_partials/home_pinned.html` + `data/pinned.yml`：主页置顶区。
+- `content/all/_index.md`：`/all/` 聚合页；只输出 HTML，不生成 RSS，也不进入归档和搜索索引。
+- `tests/test_site_build.py`：主页标签、置顶、20 条截取和 `/all/` 的构建测试。
+
+页面链接注意站点部署在 `/zhihu-archive/` 子路径：模板里用不带前导斜杠的相对路径配 `relURL`，首页用 `site.Home.RelPermalink`。
+
 ## 本地预览
 
 ```bash
@@ -92,6 +102,7 @@ python -m pytest tests
 ## 状态
 
 - 2026-10-22：首次全量同步 100 条（回答 12 / 文章 3 / 想法 85），图片 75 张；站点已上线。
+- 2026-10-23：主页改为「分类标签 + 置顶 + 最新 20 条」；新增 `/all/` 聚合页；内容摘要统一去除 HTML 标签。
 
 ## 内容与版权
 
