@@ -14,6 +14,7 @@ from .images import ImageLocalizer
 from .models import ContentItem
 from .render import html_to_markdown, render_page
 from .state import SyncState
+from .stats import build_stats, load_stats, write_stats
 
 KINDS = ("answers", "articles", "pins")
 KIND_ALIASES = {"回答": "answers", "文章": "articles", "想法": "pins"}
@@ -116,6 +117,7 @@ def run_sync(
     url_token = state.url_token or config.get("url_token") or ""
     excluded = _load_excluded(state_dir)
     report = SyncReport()
+    fresh: dict[str, dict] = {}
 
     for kind in kinds:
         excluded_ids = {item_id for excluded_kind, item_id in excluded if excluded_kind == kind}
@@ -134,6 +136,10 @@ def run_sync(
                 if limit is not None and processed >= limit:
                     complete = False
                     break
+                fresh[f"{kind}:{item.id}"] = {
+                    "voteup_count": item.voteup_count,
+                    "comment_count": item.comment_count,
+                }
                 known = f"{kind}:{item.id}" in state.items
                 bundle_exists = (content_root / kind / item.id / "index.md").exists()
                 if not state.needs_update(kind, item) and bundle_exists:
@@ -186,5 +192,15 @@ def run_sync(
                     report.marked_deleted += 1
 
     if not dry_run:
+        stats_file = config.get("stats_file")
+        if stats_file:
+            stats_path = Path(stats_file)
+            stats_data = build_stats(
+                content_root,
+                state_dir / "raw",
+                previous=load_stats(stats_path),
+                fresh=fresh,
+            )
+            write_stats(stats_path, stats_data)
         state.touch()
     return report

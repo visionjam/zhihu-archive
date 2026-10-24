@@ -1,0 +1,50 @@
+{{- define "main" }}
+
+{{- $stats := site.Data.zhihu_stats | default dict -}}
+{{- $totals := $stats.totals | default dict -}}
+{{- $byKind := $totals.by_kind | default dict -}}
+{{- $entries := slice -}}
+{{- range $key, $entry := ($stats.items | default dict) -}}
+  {{- $entries = $entries | append $entry -}}
+{{- end -}}
+{{- $entries = sort $entries "voteup_count" "desc" -}}
+{{- $labels := dict "answers" "回答" "articles" "文章" "pins" "想法" -}}
+
+<header class="page-header">
+  <h1>{{ .Title }}</h1>
+  {{- with .Content }}
+  <div class="post-content md-content">{{ . }}</div>
+  {{- end }}
+</header>
+
+<section class="site-stats">
+  <p>
+    收录 <strong>{{ lang.FormatNumber 0 ($totals.items | default 0) }}</strong> 篇
+    · 回答 {{ lang.FormatNumber 0 (index $byKind "answers" | default 0) }}
+    / 文章 {{ lang.FormatNumber 0 (index $byKind "articles" | default 0) }}
+    / 想法 {{ lang.FormatNumber 0 (index $byKind "pins" | default 0) }}
+    · 总字数 <strong>{{ lang.FormatNumber 0 ($totals.words | default 0) }}</strong>
+    · 总赞 <strong>{{ lang.FormatNumber 0 ($totals.votes | default 0) }}</strong>
+  </p>
+</section>
+
+{{- if $entries }}
+<ol class="ranking-list">
+  {{- range $index, $entry := $entries }}
+  <li class="ranking-item{{ if lt $index 3 }} rank-top{{ end }}">
+    <span class="rank">{{ add $index 1 }}</span>
+    <div class="rank-main">
+      <a class="rank-title" href="{{ strings.TrimPrefix "/" $entry.rel_path | relURL }}">{{ $entry.title }}</a>
+      <span class="rank-meta">
+        {{- index $labels $entry.kind }} · 赞 {{ lang.FormatNumber 0 $entry.voteup_count }} · 评论 {{ lang.FormatNumber 0 $entry.comment_count }} · {{ lang.FormatNumber 0 $entry.word_count }} 字 · 约 {{ $entry.reading_minutes }} 分钟
+        {{- if $entry.deleted }} · 已删除{{ end -}}
+      </span>
+    </div>
+  </li>
+  {{- end }}
+</ol>
+{{- else }}
+<p>暂无统计数据。</p>
+{{- end }}
+
+{{- end }}

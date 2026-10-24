@@ -1,0 +1,37 @@
+{{- if .Params.zhihu_id -}}
+{{- $stats := site.Data.zhihu_stats | default dict -}}
+{{- $entries := $stats.items | default dict -}}
+{{- $key := printf "%s:%s" .Type .Params.zhihu_id -}}
+{{- with index $entries $key -}}
+<div class="zhihu-stats">
+  <span>{{ if eq .kind "pins" }}赞{{ else }}赞同{{ end }}&nbsp;{{ lang.FormatNumber 0 .voteup_count }}</span>
+  <span>评论&nbsp;{{ lang.FormatNumber 0 .comment_count }}</span>
+  <span>{{ lang.FormatNumber 0 .word_count }}&nbsp;字</span>
+  <span>约&nbsp;{{ .reading_minutes }}&nbsp;分钟</span>
+  {{- if site.Params.goatcounter -}}
+  <span class="gc-views" hidden>站内浏览&nbsp;<span id="gc-count"></span></span>
+  <script>
+    (function () {
+      var label = document.querySelector('.gc-views');
+      if (!label) return;
+      var tries = 0;
+      var timer = setInterval(function () {
+        tries++;
+        if (window.goatcounter && window.goatcounter.visit_count) {
+          clearInterval(timer);
+          label.hidden = false;
+          window.goatcounter.visit_count({
+            append: '#gc-count',
+            type: 'html',
+            no_branding: true
+          });
+        } else if (tries > 50) {
+          clearInterval(timer);
+        }
+      }, 100);
+    })();
+  </script>
+  {{- end -}}
+</div>
+{{- end -}}
+{{- end -}}

@@ -27,6 +27,10 @@ menu:
       name: 归档
       url: /archives/
       weight: 20
+    - identifier: ranking
+      name: 排行
+      url: /ranking/
+      weight: 25
     - identifier: search
       name: 搜索
       url: /search/
@@ -62,6 +66,8 @@ params:
   TocOpen: false
   ShowWordCount: false
   ShowRssButtonInSectionTermList: true
+  # 填入 GoatCounter 站点代码（如 visionjam）后启用站内浏览量；留空则不加载第三方脚本。
+  goatcounter: ""
   homeInfoParams:
     Title: "知乎归档"
     Content: "这里保存我在知乎发布的回答、想法与文章。内容按同步时的原样归档，部分条目可能已从知乎删除。"

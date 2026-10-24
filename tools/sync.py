@@ -16,6 +16,7 @@ from zhihu_archive.client import AuthError, RateLimitError, ZhihuClient
 from zhihu_archive.cookie import CookieFormatError, load_cookie
 from zhihu_archive.privacy import IMAGE_EXTS, load_allowlist, scan_paths
 from zhihu_archive.state import SyncState
+from zhihu_archive.stats import build_stats, load_stats, write_stats
 from zhihu_archive.sync import KINDS, SyncReport, run_sync
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -72,7 +73,11 @@ def publish_if_clean(
         relative = Path(content_root).resolve().relative_to(root).as_posix()
     except ValueError:
         relative = str(content_root)
-    scan = scan_paths(root, [relative], allowlist)
+    data_root = root / "data"
+    scan_paths_to_check = [relative]
+    if data_root.exists():
+        scan_paths_to_check.append("data")
+    scan = scan_paths(root, scan_paths_to_check, allowlist)
 
     for finding in scan.hard:
         print(f"HARD  {finding.path}:{finding.line} [{finding.kind}] <hidden>")
@@ -81,7 +86,10 @@ def publish_if_clean(
     if not scan.ok:
         return False
 
-    run_git(root, "add", "content")
+    if data_root.exists():
+        run_git(root, "add", "content", "data")
+    else:
+        run_git(root, "add", "content")
     images = staged_image_paths(root)
     if images and not images_approved:
         print(f"新增/修改图片 {len(images)} 张，需人工确认：")
@@ -114,12 +122,19 @@ def load_config() -> dict:
     config = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
     config["content_root"] = str((ROOT / config["content_root"]).resolve())
     config["state_dir"] = str((ROOT / config["state_dir"]).resolve())
+    if config.get("stats_file"):
+        config["stats_file"] = str((ROOT / config["stats_file"]).resolve())
     return config
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="同步知乎回答、想法与文章到本地归档。")
     parser.add_argument("--check", action="store_true", help="只验证 Cookie 与登录态")
+    parser.add_argument(
+        "--refresh-stats",
+        action="store_true",
+        help="不联网，仅根据本地内容与缓存重建统计文件",
+    )
     parser.add_argument("--sample", type=int, default=0, help="每种类型只打印 N 条标题")
     parser.add_argument("--dry-run", action="store_true", help="只计算，不写文件")
     parser.add_argument("--no-push", action="store_true", help="本地提交但不推送远端")
@@ -142,6 +157,22 @@ def main(argv: list[str] | None = None) -> int:
     except ValueError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
+
+    if args.refresh_stats:
+        config = load_config()
+        stats_file = config.get("stats_file")
+        if not stats_file:
+            print("ERROR: config.json 缺少 stats_file。", file=sys.stderr)
+            return 2
+        stats_path = Path(stats_file)
+        data = build_stats(
+            Path(config["content_root"]),
+            Path(config["state_dir"]) / "raw",
+            previous=load_stats(stats_path),
+        )
+        write_stats(stats_path, data)
+        print(f"统计已重建：{data['totals']['items']} 条 -> {stats_path}")
+        return 0
 
     if args.check:
         try:

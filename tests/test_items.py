@@ -81,6 +81,40 @@ def test_pin_uses_created_and_updated_fields():
     assert item.updated.year == 2019
 
 
+def test_answer_without_voteup_count_uses_reaction_like_count():
+    raw = {
+        "id": 5,
+        "question": {"id": 6, "title": "问题"},
+        "created_time": 1560000000,
+        "content": "<p>正文</p>",
+        "reaction": {"statistics": {"like_count": 7, "favorites": 1}},
+    }
+    assert item_from_answer(raw).voteup_count == 7
+
+
+def test_answer_prefers_voteup_count_when_present():
+    raw = {
+        "id": 5,
+        "question": {"id": 6, "title": "问题"},
+        "created_time": 1560000000,
+        "content": "<p>正文</p>",
+        "voteup_count": 12,
+        "reaction": {"statistics": {"like_count": 7}},
+    }
+    assert item_from_answer(raw).voteup_count == 12
+
+
+def test_pin_uses_like_count_when_voteup_count_missing():
+    raw = {
+        "id": 791,
+        "type": "pin",
+        "created_time": 1560000000,
+        "content": [{"type": "text", "content": "原创想法"}],
+        "like_count": 4,
+    }
+    assert item_from_pin(raw).voteup_count == 4
+
+
 def test_pin_without_origin_still_maps():
     raw = {
         "id": 790,

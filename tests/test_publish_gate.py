@@ -85,6 +85,28 @@ def test_new_images_allowed_with_approval(tmp_path, monkeypatch):
     assert any("commit" in call for call in calls)
 
 
+def test_publish_scans_and_stages_data_directory(tmp_path, monkeypatch):
+    scanned = []
+    calls = []
+    (tmp_path / "data").mkdir()
+    (tmp_path / "data" / "zhihu_stats.json").write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(
+        sync,
+        "scan_paths",
+        lambda root, paths, allow: scanned.append(list(paths)) or ScanReport(),
+    )
+    monkeypatch.setattr(sync, "run_git", lambda *args, **kwargs: calls.append(args))
+    monkeypatch.setattr(sync, "staged_changes", lambda *args, **kwargs: True)
+
+    ok = sync.publish_if_clean(
+        tmp_path, tmp_path / "content", tmp_path / ".local", SyncReport(), push=False
+    )
+
+    assert ok is True
+    assert "data" in scanned[0]
+    assert any("data" in call for call in calls)
+
+
 def test_clean_scan_commits_and_pushes(tmp_path, monkeypatch):
     calls = []
     monkeypatch.setattr(

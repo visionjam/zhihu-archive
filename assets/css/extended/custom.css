@@ -181,3 +181,81 @@ body {
 :root[data-theme="dark"] .home-more a {
   color: #8fb8da;
 }
+
+/* 文章详情页统计 */
+.zhihu-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.1rem;
+  margin-top: 0.55rem;
+  color: var(--secondary);
+  font-size: 0.9rem;
+}
+
+.zhihu-stats span {
+  white-space: nowrap;
+}
+
+/* 排行榜 */
+.site-stats {
+  margin: 1.2rem 0 1.6rem;
+  padding: 0.9rem 1rem;
+  border-left: 3px solid #2f5d8a;
+  background: rgba(47, 93, 138, 0.06);
+  line-height: 1.9;
+}
+
+.site-stats p {
+  margin: 0;
+}
+
+.ranking-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.ranking-item {
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.ranking-item:last-child {
+  border-bottom: none;
+}
+
+.rank {
+  flex: 0 0 2.2rem;
+  text-align: right;
+  color: var(--secondary);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.rank-top .rank {
+  color: #b06a2c;
+}
+
+:root[data-theme="dark"] .rank-top .rank {
+  color: #d79a5b;
+}
+
+.rank-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.rank-title {
+  font-weight: 600;
+}
+
+.rank-meta {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--secondary);
+  font-size: 0.9rem;
+}
+

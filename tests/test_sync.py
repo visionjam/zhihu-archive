@@ -216,3 +216,74 @@ def test_dry_run_writes_nothing(tmp_path):
     report = run_sync(FakeClient({"answers": [item(1)]}), SyncState(), config, dry_run=True)
     assert report.added == 1
     assert not (tmp_path / "content").exists()
+
+
+def stats_config(tmp_path):
+    return {
+        "content_root": tmp_path / "content",
+        "state_dir": tmp_path / ".local",
+        "stats_file": tmp_path / "data" / "zhihu_stats.json",
+    }
+
+
+def test_sync_writes_stats_file(tmp_path):
+    import json
+
+    config = stats_config(tmp_path)
+    run_sync(FakeClient({"answers": [item(1)]}), SyncState(), config)
+
+    data = json.loads(config["stats_file"].read_text(encoding="utf-8"))
+    entry = data["items"]["answers:1"]
+    assert entry["voteup_count"] == 0
+    assert entry["word_count"] == 3
+    assert entry["reading_minutes"] == 1
+    assert data["totals"]["items"] == 1
+
+
+def test_sync_refreshes_stats_without_rewriting_page(tmp_path):
+    import json
+
+    state = SyncState()
+    config = stats_config(tmp_path)
+    run_sync(FakeClient({"answers": [item(1)]}), state, config)
+    page = config["content_root"] / "answers/1/index.md"
+    before = page.stat().st_mtime_ns
+
+    updated = item(1)
+    updated.voteup_count = 5
+    run_sync(FakeClient({"answers": [updated]}), state, config)
+
+    assert page.stat().st_mtime_ns == before
+    data = json.loads(config["stats_file"].read_text(encoding="utf-8"))
+    assert data["items"]["answers:1"]["voteup_count"] == 5
+
+
+def test_deleted_item_stays_in_stats_and_is_flagged(tmp_path):
+    import json
+
+    state = SyncState()
+    config = stats_config(tmp_path)
+    run_sync(FakeClient({"answers": [item(1)]}), state, config)
+    run_sync(FakeClient({"answers": []}), state, config)
+
+    data = json.loads(config["stats_file"].read_text(encoding="utf-8"))
+    assert data["items"]["answers:1"]["deleted"] is True
+
+
+def test_excluded_item_is_removed_from_stats(tmp_path):
+    import json
+
+    local = tmp_path / ".local"
+    local.mkdir()
+    (local / "exclude.txt").write_text("answers:1\n", encoding="utf-8")
+    config = stats_config(tmp_path)
+    run_sync(FakeClient({"answers": [item(1)]}), SyncState(), config)
+
+    data = json.loads(config["stats_file"].read_text(encoding="utf-8"))
+    assert "answers:1" not in data["items"]
+
+
+def test_dry_run_does_not_write_stats(tmp_path):
+    config = stats_config(tmp_path)
+    run_sync(FakeClient({"answers": [item(1)]}), SyncState(), config, dry_run=True)
+    assert not config["stats_file"].exists()

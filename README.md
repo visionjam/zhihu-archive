@@ -10,6 +10,7 @@ VisionJam 的知乎回答、想法与文章归档站。归档站与博客平行�
 
 - 同步本人在知乎发布的**回答、想法、文章**；想法转发按知乎页面呈现归档。
 - 每篇内容生成一个 page bundle，图片下载到本地，保留原文链接。
+- 每篇标注赞同数、评论数、字数和预计阅读时长；`/ranking/` 按赞同数排行，并显示全站统计条。
 - 已从知乎删除的内容继续保留，并在页面上标注。
 - 第一次全量、之后增量；中断后可续跑。
 - Cookie 只留本机，GitHub Actions 不持有任何凭证，只负责构建与部署。
@@ -25,10 +26,15 @@ VisionJam 的知乎回答、想法与文章归档站。归档站与博客平行�
 - `layouts/list.html`：首页/栏目页布局覆盖——首页截取最新 `params.homeLimit` 条回答+文章，`/all/` 混排三类。
 - `layouts/_partials/type_tabs.html`：首页与各列表页顶部的分类标签。
 - `layouts/_partials/home_pinned.html` + `data/pinned.yml`：主页置顶区。
+- `content/ranking.md` + `layouts/ranking.html`：`/ranking/` 排行页，从 `data/zhihu_stats.json` 读取并排序。
+- `data/zhihu_stats.json`：同步生成的统计文件（赞、评论、字数、阅读时长）；`python tools/sync.py --refresh-stats` 可在不联网时从本地正文与缓存重建。
+- `layouts/single.html` + `layouts/_partials/zhihu_stats.html`：单篇标题下的统计行。
 - `content/all/_index.md`：`/all/` 聚合页；只输出 HTML，不生成 RSS，也不进入归档和搜索索引。
-- `tests/test_site_build.py`：主页标签、置顶、20 条截取和 `/all/` 的构建测试。
+- `tests/test_site_build.py`：主页标签、置顶、20 条截取、排行页和统计行的构建测试。
 
 页面链接注意站点部署在 `/zhihu-archive/` 子路径：模板里用不带前导斜杠的相对路径配 `relURL`，首页用 `site.Home.RelPermalink`。
+
+浏览量说明：知乎接口不提供回答、文章、想法的浏览数。站内浏览量是可选的 GoatCounter 接入——在 `hugo.yml` 的 `params.goatcounter` 填入站点代码并在 GoatCounter 后台开启 visitor counts 后启用；留空时不加载任何第三方脚本。
 
 ## 本地预览
 
@@ -72,6 +78,7 @@ python tools/sync.py                       # 全量或增量；写文件、扫�
 python tools/sync.py --no-push             # 本地提交，不推送
 python tools/sync.py --types answers,pins  # 只同步部分类型
 python tools/sync.py --yes-images          # 确认本轮新增/修改的图片可以公开
+python tools/sync.py --refresh-stats       # 不联网，重建 data/zhihu_stats.json
 ```
 
 首次全量受知乎接口限速影响（每次请求随机等待 2–5 秒），内容多时需要较长时间；中断后重跑即可续跑。
@@ -103,6 +110,7 @@ python -m pytest tests
 
 - 2026-10-22：首次全量同步 100 条（回答 12 / 文章 3 / 想法 85），图片 75 张；站点已上线。
 - 2026-10-23：主页改为「分类标签 + 置顶 + 最新 20 条」；新增 `/all/` 聚合页；内容摘要统一去除 HTML 标签。
+- 2026-10-24：新增 `/ranking/` 赞数排行与全站统计条；单篇显示赞同/评论/字数/阅读时长；统计写入 `data/zhihu_stats.json`，并预留 GoatCounter 站内浏览量。
 
 ## 内容与版权
 

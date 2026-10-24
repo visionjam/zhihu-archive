@@ -2,6 +2,7 @@
   "cookie_file": "",
   "content_root": "content",
   "state_dir": ".local",
+  "stats_file": "data/zhihu_stats.json",
   "delay_min": 2.0,
   "delay_max": 5.0,
   "site_url": "https://visionjam.github.io/zhihu-archive/"

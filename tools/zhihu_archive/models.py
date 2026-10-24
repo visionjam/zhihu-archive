@@ -55,6 +55,17 @@ def _tags(raw: dict) -> list[str]:
     return [topic["name"] for topic in raw.get("topics") or [] if topic.get("name")]
 
 
+def _voteup(raw: dict) -> int:
+    """知乎新版回答只给 reaction.statistics.like_count，想法只给 like_count。"""
+    value = raw.get("voteup_count")
+    if value is None:
+        value = raw.get("like_count")
+    if value is None:
+        statistics = (raw.get("reaction") or {}).get("statistics") or {}
+        value = statistics.get("like_count")
+    return int(value or 0)
+
+
 def _plain_text(html: str) -> str:
     text = re.sub(r"<[^>]*>?", "", html or "")
     return unescape(text).replace("\xa0", " ").strip()
@@ -94,7 +105,7 @@ def item_from_answer(raw: dict) -> ContentItem:
         created=created,
         updated=_updated(raw),
         content_html=raw.get("content") or "",
-        voteup_count=int(raw.get("voteup_count") or 0),
+        voteup_count=_voteup(raw),
         comment_count=int(raw.get("comment_count") or 0),
         tags=_tags(raw),
         summary=_plain_text(raw.get("excerpt") or ""),
@@ -115,7 +126,7 @@ def item_from_article(raw: dict) -> ContentItem:
         created=created,
         updated=_updated(raw),
         content_html=raw.get("content") or "",
-        voteup_count=int(raw.get("voteup_count") or 0),
+        voteup_count=_voteup(raw),
         comment_count=int(raw.get("comment_count") or 0),
         tags=_tags(raw),
         summary=_plain_text(raw.get("excerpt") or ""),
@@ -141,7 +152,7 @@ def item_from_pin(raw: dict) -> ContentItem:
         created=created,
         updated=_updated(raw),
         content_html=html,
-        voteup_count=int(raw.get("voteup_count") or 0),
+        voteup_count=_voteup(raw),
         comment_count=int(raw.get("comment_count") or 0),
         tags=_tags(raw),
         summary=_plain_text(html)[:140],

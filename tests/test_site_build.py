@@ -1,3 +1,4 @@
+import json
 import re
 import shutil
 import subprocess
@@ -36,11 +37,13 @@ def read_page(public, *parts):
 def temp_bundles():
     created = []
 
-    def add(kind, slug, title, date="2026-01-01"):
+    def add(kind, slug, title, date="2026-01-01", zhihu_id=None):
         bundle = ROOT / "content" / kind / slug
         bundle.mkdir(parents=True)
+        zhihu_id_line = f'zhihu_id: "{zhihu_id}"\n' if zhihu_id else ""
         (bundle / "index.md").write_text(
-            f'---\ntitle: "{title}"\ndate: {date}\ntype: {kind}\n---\n\n测试正文\n',
+            f'---\ntitle: "{title}"\ndate: {date}\ntype: {kind}\n'
+            f"{zhihu_id_line}---\n\n测试正文\n",
             encoding="utf-8",
         )
         created.append(bundle)
@@ -49,6 +52,150 @@ def temp_bundles():
     yield add
     for bundle in reversed(created):
         shutil.rmtree(bundle, ignore_errors=True)
+
+
+@pytest.fixture
+def temp_stats():
+    path = ROOT / "data" / "zhihu_stats.json"
+    backup = path.read_bytes() if path.exists() else None
+
+    def write(data):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(
+            json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+
+    yield write
+    if backup is None:
+        path.unlink(missing_ok=True)
+    else:
+        path.write_bytes(backup)
+
+
+def stats_entry(
+    kind, item_id, title, votes, words=100, minutes=1, comments=0, deleted=False
+):
+    return {
+        "kind": kind,
+        "id": item_id,
+        "title": title,
+        "url": f"https://www.zhihu.com/{item_id}",
+        "rel_path": f"/{kind}/{item_id}/",
+        "created": "2026-01-01",
+        "deleted": deleted,
+        "voteup_count": votes,
+        "comment_count": comments,
+        "word_count": words,
+        "reading_minutes": minutes,
+    }
+
+
+def test_ranking_page_sorts_by_votes_and_shows_totals(tmp_path, temp_stats):
+    temp_stats(
+        {
+            "generated_at": "2026-01-01T00:00:00+00:00",
+            "totals": {
+                "items": 3,
+                "words": 300,
+                "votes": 15,
+                "comments": 0,
+                "by_kind": {"answers": 1, "articles": 1, "pins": 1},
+            },
+            "items": {
+                "answers:test-low": stats_entry(
+                    "answers", "test-low", "TABTEST-RANK-LOW", 1, deleted=True
+                ),
+                "articles:test-high": stats_entry(
+                    "articles", "test-high", "TABTEST-RANK-HIGH", 9
+                ),
+                "pins:test-mid": stats_entry(
+                    "pins", "test-mid", "TABTEST-RANK-MID", 5
+                ),
+            },
+        }
+    )
+    public = build_site(tmp_path)
+    ranking = read_page(public, "ranking")
+    flat = re.sub(r"\s+", " ", ranking)
+
+    high = flat.index("TABTEST-RANK-HIGH")
+    mid = flat.index("TABTEST-RANK-MID")
+    low = flat.index("TABTEST-RANK-LOW")
+    assert high < mid < low
+    assert '<strong>3</strong>' in flat
+    assert '<strong>300</strong>' in flat
+    assert '<strong>15</strong>' in flat
+    assert 'href="/zhihu-archive/answers/test-low/"' in flat
+    assert 'class="ranking-item rank-top"' in flat
+    assert "已删除" in flat
+    assert "gc.zgo.at" not in ranking
+
+
+def test_goatcounter_loads_only_when_configured(tmp_path, temp_bundles, temp_stats):
+    config = ROOT / "hugo.yml"
+    backup = config.read_bytes()
+    temp_bundles("answers", "_stats_gc", "TABTEST-GC-SINGLE", zhihu_id="gc")
+    temp_stats(
+        {
+            "generated_at": "2026-01-01T00:00:00+00:00",
+            "totals": {
+                "items": 1,
+                "words": 2,
+                "votes": 1,
+                "comments": 0,
+                "by_kind": {"answers": 1, "articles": 0, "pins": 0},
+            },
+            "items": {
+                "answers:gc": stats_entry("answers", "gc", "TABTEST-GC-SINGLE", 1, 2, 1)
+            },
+        }
+    )
+    try:
+        config.write_text(
+            backup.decode("utf-8").replace('goatcounter: ""', 'goatcounter: "tabtest"'),
+            encoding="utf-8",
+        )
+        public = build_site(tmp_path)
+        home = read_page(public)
+        page = read_page(public, "answers", "_stats_gc")
+
+        assert "tabtest.goatcounter.com/count" in home
+        assert "gc.zgo.at/count.js" in home
+        assert "站内浏览" in page
+        assert "gc-views" in page
+    finally:
+        config.write_bytes(backup)
+
+
+def test_single_page_shows_votes_words_and_reading_time(
+    tmp_path, temp_bundles, temp_stats
+):
+    temp_bundles("answers", "_stats_single", "TABTEST-STATS-SINGLE", zhihu_id="single")
+    temp_stats(
+        {
+            "generated_at": "2026-01-01T00:00:00+00:00",
+            "totals": {
+                "items": 1,
+                "words": 1234,
+                "votes": 7,
+                "comments": 2,
+                "by_kind": {"answers": 1, "articles": 0, "pins": 0},
+            },
+            "items": {
+                "answers:single": stats_entry(
+                    "answers", "single", "TABTEST-STATS-SINGLE", 7, 1234, 4, comments=2
+                )
+            },
+        }
+    )
+    public = build_site(tmp_path)
+    page = read_page(public, "answers", "_stats_single")
+
+    assert "赞同&nbsp;7" in page
+    assert "评论&nbsp;2" in page
+    assert "1,234&nbsp;字" in page
+    assert "约&nbsp;4&nbsp;分钟" in page
+    assert "gc.zgo.at" not in page
 
 
 def test_katex_assets_exist():
