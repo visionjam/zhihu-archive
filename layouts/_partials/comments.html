@@ -1,0 +1,49 @@
+{{- if and .Params.zhihu_id site.Params.giscus.categoryId -}}
+<div class="comments" id="comments">
+  <h2>点赞与评论</h2>
+  <p class="comments-hint">登录 GitHub 后可点 👍 或留言；点赞数在下次构建时更新。</p>
+  <script src="https://giscus.app/client.js"
+          data-repo="{{ site.Params.giscus.repo }}"
+          data-repo-id="{{ site.Params.giscus.repoId }}"
+          data-category="{{ site.Params.giscus.category }}"
+          data-category-id="{{ site.Params.giscus.categoryId }}"
+          data-mapping="pathname"
+          data-strict="0"
+          data-reactions-enabled="1"
+          data-emit-metadata="0"
+          data-input-position="bottom"
+          data-theme="preferred_color_scheme"
+          data-lang="zh-CN"
+          data-loading="lazy"
+          crossorigin="anonymous"
+          async>
+  </script>
+  <noscript>点赞与评论需要启用 JavaScript 并登录 GitHub。</noscript>
+</div>
+<script>
+(function () {
+    function currentTheme() {
+        return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+    }
+    function syncGiscus() {
+        var iframe = document.querySelector("iframe.giscus-frame");
+        if (!iframe) return;
+        iframe.contentWindow.postMessage(
+            { giscus: { setConfig: { theme: currentTheme() } } },
+            "https://giscus.app"
+        );
+    }
+    new MutationObserver(syncGiscus).observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-theme"]
+    });
+    var attempts = 0;
+    var timer = setInterval(function () {
+        syncGiscus();
+        if (document.querySelector("iframe.giscus-frame") || ++attempts > 40) {
+            clearInterval(timer);
+        }
+    }, 250);
+})();
+</script>
+{{- end -}}

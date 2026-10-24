@@ -11,6 +11,7 @@ VisionJam 的知乎回答、想法与文章归档站。归档站与博客平行�
 - 同步本人在知乎发布的**回答、想法、文章**；想法转发按知乎页面呈现归档。
 - 每篇内容生成一个 page bundle，图片下载到本地，保留原文链接。
 - 每篇标注赞同数、评论数、字数和预计阅读时长；`/ranking/` 按赞同数排行，并显示全站统计条。
+- 每篇底部接入 Giscus：登录 GitHub 后可点 👍 或评论；站内赞数在构建前从 GitHub Discussions 读取。
 - 已从知乎删除的内容继续保留，并在页面上标注。
 - 第一次全量、之后增量；中断后可续跑。
 - Cookie 只留本机，GitHub Actions 不持有任何凭证，只负责构建与部署。
@@ -28,13 +29,17 @@ VisionJam 的知乎回答、想法与文章归档站。归档站与博客平行�
 - `layouts/_partials/home_pinned.html` + `data/pinned.yml`：主页置顶区。
 - `content/ranking.md` + `layouts/ranking.html`：`/ranking/` 排行页，从 `data/zhihu_stats.json` 读取并排序。
 - `data/zhihu_stats.json`：同步生成的统计文件（赞、评论、字数、阅读时长）；`python tools/sync.py --refresh-stats` 可在不联网时从本地正文与缓存重建。
-- `layouts/single.html` + `layouts/_partials/zhihu_stats.html`：单篇标题下的统计行。
+- `layouts/single.html` + `layouts/_partials/zhihu_stats.html`：单篇标题下的统计行（含站内赞）。
+- `layouts/_partials/comments.html`：Giscus 点赞/评论，仅知乎内容页。
+- `tools/fetch_likes.py` + `data/likes.json`：构建前读取 GitHub Discussions 主帖 👍 的快照；CI 每天 04:00 UTC 刷新。
 - `content/all/_index.md`：`/all/` 聚合页；只输出 HTML，不生成 RSS，也不进入归档和搜索索引。
 - `tests/test_site_build.py`：主页标签、置顶、20 条截取、排行页和统计行的构建测试。
 
 页面链接注意站点部署在 `/zhihu-archive/` 子路径：模板里用不带前导斜杠的相对路径配 `relURL`，首页用 `site.Home.RelPermalink`。
 
 浏览量说明：知乎接口不提供回答、文章、想法的浏览数。站内浏览量是可选的 GoatCounter 接入——在 `hugo.yml` 的 `params.goatcounter` 填入站点代码并在 GoatCounter 后台开启 visitor counts 后启用；留空时不加载任何第三方脚本。
+
+站内赞说明：Giscus 主帖的 👍 存在 GitHub Discussions；构建前由 `tools/fetch_likes.py` 读取并写入 `data/likes.json`。点赞后要等下一次推送或每日 04:00 UTC 的定时构建才更新页面；访客需 GitHub 登录才能点赞。
 
 ## 本地预览
 
@@ -111,6 +116,7 @@ python -m pytest tests
 - 2026-10-22：首次全量同步 100 条（回答 12 / 文章 3 / 想法 85），图片 75 张；站点已上线。
 - 2026-10-23：主页改为「分类标签 + 置顶 + 最新 20 条」；新增 `/all/` 聚合页；内容摘要统一去除 HTML 标签。
 - 2026-10-24：新增 `/ranking/` 赞数排行与全站统计条；单篇显示赞同/评论/字数/阅读时长；统计写入 `data/zhihu_stats.json`，并预留 GoatCounter 站内浏览量。
+- 2026-10-24：接入 Giscus 站内点赞/评论；构建前从 GitHub Discussions 读取 👍 写入 `data/likes.json`，排行页与单篇显示站内赞。
 
 ## 内容与版权
 

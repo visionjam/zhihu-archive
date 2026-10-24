@@ -55,6 +55,24 @@ def temp_bundles():
 
 
 @pytest.fixture
+def temp_likes():
+    path = ROOT / "data" / "likes.json"
+    backup = path.read_bytes() if path.exists() else None
+
+    def write(data):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(
+            json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+
+    yield write
+    if backup is None:
+        path.unlink(missing_ok=True)
+    else:
+        path.write_bytes(backup)
+
+
+@pytest.fixture
 def temp_stats():
     path = ROOT / "data" / "zhihu_stats.json"
     backup = path.read_bytes() if path.exists() else None
@@ -165,6 +183,44 @@ def test_goatcounter_loads_only_when_configured(tmp_path, temp_bundles, temp_sta
         assert "gc-views" in page
     finally:
         config.write_bytes(backup)
+
+
+def test_site_likes_show_on_post_and_ranking(
+    tmp_path, temp_bundles, temp_stats, temp_likes
+):
+    temp_bundles("answers", "_likes_test", "TABTEST-SITE-LIKES", zhihu_id="_likes_test")
+    temp_stats(
+        {
+            "generated_at": "2026-01-01T00:00:00+00:00",
+            "totals": {
+                "items": 1,
+                "words": 100,
+                "votes": 7,
+                "comments": 2,
+                "by_kind": {"answers": 1, "articles": 0, "pins": 0},
+            },
+            "items": {
+                "answers:_likes_test": stats_entry(
+                    "answers", "_likes_test", "TABTEST-SITE-LIKES", 7, 100, 1, comments=2
+                )
+            },
+        }
+    )
+    temp_likes(
+        {
+            "generated_at": "2026-01-01T00:00:00+00:00",
+            "items": {"/zhihu-archive/answers/_likes_test/": {"likes": 4, "url": ""}},
+        }
+    )
+    public = build_site(tmp_path)
+
+    page = read_page(public, "answers", "_likes_test")
+    assert "站内赞&nbsp;4" in page
+    assert "giscus.app/client.js" in page
+
+    ranking = re.sub(r"\s+", " ", read_page(public, "ranking"))
+    assert "站内赞 4" in ranking
+    assert "站内赞 <strong>4</strong>" in ranking
 
 
 def test_single_page_shows_votes_words_and_reading_time(

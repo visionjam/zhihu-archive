@@ -68,6 +68,13 @@ params:
   ShowRssButtonInSectionTermList: true
   # 填入 GoatCounter 站点代码（如 visionjam）后启用站内浏览量；留空则不加载第三方脚本。
   goatcounter: ""
+  # Giscus 站内点赞/评论：主帖 👍 由 CI 构建前写入 data/likes.json。
+  comments: true
+  giscus:
+    repo: "visionjam/zhihu-archive"
+    repoId: "R_kgDOVToP6Q"
+    category: "Announcements"
+    categoryId: "DIC_kwDOVToP6c4DJeNR"
   homeInfoParams:
     Title: "知乎归档"
     Content: "这里保存我在知乎发布的回答、想法与文章。内容按同步时的原样归档，部分条目可能已从知乎删除。"

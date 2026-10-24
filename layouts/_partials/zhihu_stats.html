@@ -2,10 +2,17 @@
 {{- $stats := site.Data.zhihu_stats | default dict -}}
 {{- $entries := $stats.items | default dict -}}
 {{- $key := printf "%s:%s" .Type .Params.zhihu_id -}}
+{{- $likesData := site.Data.likes | default dict -}}
+{{- $likeItems := $likesData.items | default dict -}}
+{{- $likes := 0 -}}
+{{- with index $likeItems .RelPermalink -}}
+  {{- $likes = .likes | default 0 -}}
+{{- end -}}
 {{- with index $entries $key -}}
 <div class="zhihu-stats">
   <span>{{ if eq .kind "pins" }}赞{{ else }}赞同{{ end }}&nbsp;{{ lang.FormatNumber 0 .voteup_count }}</span>
   <span>评论&nbsp;{{ lang.FormatNumber 0 .comment_count }}</span>
+  <span>站内赞&nbsp;{{ lang.FormatNumber 0 $likes }}</span>
   <span>{{ lang.FormatNumber 0 .word_count }}&nbsp;字</span>
   <span>约&nbsp;{{ .reading_minutes }}&nbsp;分钟</span>
   {{- if site.Params.goatcounter -}}

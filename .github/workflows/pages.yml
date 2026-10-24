@@ -4,11 +4,14 @@ on:
   push:
     branches: ["main"]
   workflow_dispatch:
+  schedule:
+    - cron: "0 4 * * *"
 
 permissions:
   contents: read
   pages: write
   id-token: write
+  discussions: read
 
 concurrency:
   group: "pages"
@@ -31,6 +34,11 @@ jobs:
         with:
           hugo-version: "0.168.0"
           extended: true
+
+      - name: Fetch discussion likes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 tools/fetch_likes.py
 
       - name: Build with Hugo
         run: hugo --minify --gc

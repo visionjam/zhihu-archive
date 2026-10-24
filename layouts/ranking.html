@@ -3,9 +3,18 @@
 {{- $stats := site.Data.zhihu_stats | default dict -}}
 {{- $totals := $stats.totals | default dict -}}
 {{- $byKind := $totals.by_kind | default dict -}}
+{{- $likesData := site.Data.likes | default dict -}}
+{{- $likeItems := $likesData.items | default dict -}}
 {{- $entries := slice -}}
+{{- $siteLikesTotal := 0 -}}
 {{- range $key, $entry := ($stats.items | default dict) -}}
-  {{- $entries = $entries | append $entry -}}
+  {{- $path := strings.TrimPrefix "/" $entry.rel_path | relURL -}}
+  {{- $siteLikes := 0 -}}
+  {{- with index $likeItems $path -}}
+    {{- $siteLikes = .likes | default 0 -}}
+  {{- end -}}
+  {{- $entries = $entries | append (merge $entry (dict "site_likes" $siteLikes)) -}}
+  {{- $siteLikesTotal = add $siteLikesTotal $siteLikes -}}
 {{- end -}}
 {{- $entries = sort $entries "voteup_count" "desc" -}}
 {{- $labels := dict "answers" "回答" "articles" "文章" "pins" "想法" -}}
@@ -25,6 +34,7 @@
     / 想法 {{ lang.FormatNumber 0 (index $byKind "pins" | default 0) }}
     · 总字数 <strong>{{ lang.FormatNumber 0 ($totals.words | default 0) }}</strong>
     · 总赞 <strong>{{ lang.FormatNumber 0 ($totals.votes | default 0) }}</strong>
+    · 站内赞 <strong>{{ lang.FormatNumber 0 $siteLikesTotal }}</strong>
   </p>
 </section>
 
@@ -36,7 +46,7 @@
     <div class="rank-main">
       <a class="rank-title" href="{{ strings.TrimPrefix "/" $entry.rel_path | relURL }}">{{ $entry.title }}</a>
       <span class="rank-meta">
-        {{- index $labels $entry.kind }} · 赞 {{ lang.FormatNumber 0 $entry.voteup_count }} · 评论 {{ lang.FormatNumber 0 $entry.comment_count }} · {{ lang.FormatNumber 0 $entry.word_count }} 字 · 约 {{ $entry.reading_minutes }} 分钟
+        {{- index $labels $entry.kind }} · 赞 {{ lang.FormatNumber 0 $entry.voteup_count }} · 评论 {{ lang.FormatNumber 0 $entry.comment_count }} · 站内赞 {{ lang.FormatNumber 0 ($entry.site_likes | default 0) }} · {{ lang.FormatNumber 0 $entry.word_count }} 字 · 约 {{ $entry.reading_minutes }} 分钟
         {{- if $entry.deleted }} · 已删除{{ end -}}
       </span>
     </div>
