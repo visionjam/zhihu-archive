@@ -1,0 +1,45 @@
+{{- $page := . -}}
+{{- $showDates := false -}}
+{{- if reflect.IsMap . -}}
+    {{- $page = .page -}}
+    {{- $showDates = .showDates | default false -}}
+{{- end -}}
+
+{{- $meta := slice }}
+{{- $dateFormat := default ":date_long" site.Params.DateFormat -}}
+
+{{- if not $page.Date.IsZero -}}
+    {{- $dateText := $page.Date | time.Format $dateFormat -}}
+    {{- if $showDates -}}
+        {{- $dateText = printf "发布于 %s" $dateText -}}
+    {{- end -}}
+    {{- $meta = $meta | append (printf "<span title='%s'>%s</span>" ($page.Date | time.Format "2006-01-02T15:04:05-07:00") $dateText) }}
+{{- end }}
+
+{{- if $showDates }}
+    {{- $dateText := $page.Date | time.Format $dateFormat -}}
+    {{- $lastmodText := $page.Lastmod | time.Format $dateFormat -}}
+    {{- if and (ne $lastmodText $dateText) ($page.Lastmod.After $page.Date) -}}
+        {{- $meta = $meta | append (printf "<span title='%s'>最后编辑于 %s</span>" ($page.Lastmod | time.Format "2006-01-02T15:04:05-07:00") $lastmodText) }}
+    {{- end -}}
+{{- end -}}
+
+{{- if ($page.Param "ShowReadingTime") -}}
+    {{- $meta = $meta | append (printf "<span>%s</span>" (i18n "read_time" $page.ReadingTime | default (printf "%d min" $page.ReadingTime))) -}}
+{{- end -}}
+
+{{- if ($page.Param "ShowWordCount") -}}
+    {{- $meta = $meta | append (printf "<span>%s</span>" (i18n "words" $page.WordCount | default (printf "%d words" $page.WordCount))) -}}
+{{- end -}}
+
+{{- if not ($page.Param "hideAuthor") -}}
+    {{- with (partial "author.html" $page) }}
+        {{- $meta = $meta | append (printf "<span>%s</span>" .) }}
+    {{- end }}
+{{- end }}
+
+{{/* Combine all meta information into a single string with separators and render it as HTML.*/}}
+
+{{- with $meta }}
+    {{- delimit . "&nbsp;·&nbsp;" | safeHTML -}}
+{{- end -}}

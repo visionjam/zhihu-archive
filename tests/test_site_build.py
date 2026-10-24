@@ -37,13 +37,14 @@ def read_page(public, *parts):
 def temp_bundles():
     created = []
 
-    def add(kind, slug, title, date="2026-01-01", zhihu_id=None):
+    def add(kind, slug, title, date="2026-01-01", zhihu_id=None, lastmod=None):
         bundle = ROOT / "content" / kind / slug
         bundle.mkdir(parents=True)
         zhihu_id_line = f'zhihu_id: "{zhihu_id}"\n' if zhihu_id else ""
+        lastmod_line = f"lastmod: {lastmod}\n" if lastmod else ""
         (bundle / "index.md").write_text(
             f'---\ntitle: "{title}"\ndate: {date}\ntype: {kind}\n'
-            f"{zhihu_id_line}---\n\n测试正文\n",
+            f"{lastmod_line}{zhihu_id_line}---\n\n测试正文\n",
             encoding="utf-8",
         )
         created.append(bundle)
@@ -281,6 +282,35 @@ def test_single_page_shows_votes_words_and_reading_time(
     assert "1,234&nbsp;字" in page
     assert "约&nbsp;4&nbsp;分钟" in page
     assert "gc.zgo.at" not in page
+
+
+def test_single_page_shows_publish_and_edit_dates(tmp_path, temp_bundles):
+    temp_bundles(
+        "answers",
+        "_dates_edited",
+        "TABTEST-DATES-EDITED",
+        date="2026-01-01",
+        lastmod="2026-03-05",
+        zhihu_id="dates_edited",
+    )
+    temp_bundles(
+        "answers",
+        "_dates_plain",
+        "TABTEST-DATES-PLAIN",
+        date="2026-01-01",
+        zhihu_id="dates_plain",
+    )
+    public = build_site(tmp_path)
+
+    edited = read_page(public, "answers", "_dates_edited")
+    plain = read_page(public, "answers", "_dates_plain")
+    home = read_page(public)
+
+    assert "发布于 2026-01-01" in edited
+    assert "最后编辑于 2026-03-05" in edited
+    assert "发布于 2026-01-01" in plain
+    assert "最后编辑于" not in plain
+    assert "发布于" not in home
 
 
 def test_katex_assets_exist():
