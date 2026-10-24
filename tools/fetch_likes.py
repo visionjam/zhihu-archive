@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib import request
@@ -29,19 +28,24 @@ query($owner: String!, $name: String!, $cursor: String) {
 }
 """
 
-PATH_RE = re.compile(r"(/[A-Za-z0-9._~!$&'()*+,;=:@%/-]+/?)\s*$")
+def _normalize_path(value: str) -> str:
+    value = value.strip().strip("，。,. ")
+    if value and not value.startswith("/"):
+        value = "/" + value
+    return value
 
 
 def discussion_key(title: str) -> str:
-    """giscus 的 pathname 映射会把页面路径写进讨论标题；取出末尾路径。"""
+    """giscus 的 pathname 映射会把页面路径写进讨论标题；取出路径并补前导斜杠。"""
     title = (title or "").strip()
     for token in title.split():
         if "://" in token:
             path = urlparse(token).path
             if path:
-                return path
-    match = PATH_RE.search(title)
-    return match.group(1) if match else title
+                return _normalize_path(path)
+        if "/" in token and any(char.isalnum() for char in token):
+            return _normalize_path(token)
+    return title
 
 
 def extract_likes(nodes) -> dict:

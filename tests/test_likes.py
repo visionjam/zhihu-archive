@@ -35,6 +35,10 @@ def test_discussion_key_extracts_trailing_path():
         fetch_likes.discussion_key("https://example.com/zhihu-archive/answers/1/")
         == "/zhihu-archive/answers/1/"
     )
+    assert (
+        fetch_likes.discussion_key("zhihu-archive/answers/1/")
+        == "/zhihu-archive/answers/1/"
+    )
 
 
 def test_collect_paginates():
