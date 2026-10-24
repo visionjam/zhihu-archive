@@ -27,7 +27,7 @@ VisionJam 的知乎回答、想法与文章归档站。归档站与博客平行�
 - `layouts/list.html`：首页/栏目页布局覆盖——首页截取最新 `params.homeLimit` 条回答+文章，`/all/` 混排三类。
 - `layouts/_partials/type_tabs.html`：首页与各列表页顶部的分类标签。
 - `layouts/_partials/home_pinned.html` + `data/pinned.yml`：主页置顶区。
-- `content/ranking.md` + `layouts/ranking.html`：`/ranking/` 排行页，从 `data/zhihu_stats.json` 读取并排序；支持 全部/回答/文章/想法 筛选（`?type=answers` 等）。
+- `content/ranking/_index.md` + `layouts/ranking.html`：`/ranking/` 排行 section，从 `data/zhihu_stats.json` 读取并排序；支持 全部/回答/文章/想法 筛选（`?type=answers` 等）。
 - `data/zhihu_stats.json`：同步生成的统计文件（赞、评论、字数、阅读时长）；`python tools/sync.py --refresh-stats` 可在不联网时从本地正文与缓存重建。
 - `layouts/single.html` + `layouts/_partials/zhihu_stats.html`：单篇标题下的统计行（含站内赞）。
 - `layouts/_partials/comments.html`：Giscus 点赞/评论，仅知乎内容页。
