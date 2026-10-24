@@ -1,0 +1,7 @@
+{{- if os.FileExists "static/github-metrics.svg" -}}
+<a href="https://github.com/visionjam" target="_blank" rel="noopener">
+  <img src="{{ "github-metrics.svg" | relURL }}" alt="GitHub 贡献日历" class="github-metrics" loading="lazy">
+</a>
+{{- else -}}
+<p><a href="https://github.com/visionjam" target="_blank" rel="noopener">在 GitHub 查看贡献</a></p>
+{{- end -}}

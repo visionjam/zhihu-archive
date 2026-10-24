@@ -31,6 +31,7 @@ VisionJam 的知乎回答、想法与文章归档站。归档站与博客平行�
 - `data/zhihu_stats.json`：同步生成的统计文件（赞、评论、字数、阅读时长）；`python tools/sync.py --refresh-stats` 可在不联网时从本地正文与缓存重建。
 - `layouts/single.html` + `layouts/_partials/zhihu_stats.html`：单篇标题下的统计行（含站内赞）。
 - `layouts/_partials/comments.html`：Giscus 点赞/评论，仅知乎内容页。
+- `layouts/_shortcodes/github-metrics.html`：关于页 GitHub 贡献图；CI 生成 `static/github-metrics.svg`（不入库）。
 - `tools/fetch_likes.py` + `data/likes.json`：构建前读取 GitHub Discussions 主帖 👍 的快照；CI 每天 04:00 UTC 刷新。
 - `content/all/_index.md`：`/all/` 聚合页；只输出 HTML，不生成 RSS，也不进入归档和搜索索引。
 - `tests/test_site_build.py`：主页标签、置顶、20 条截取、排行页和统计行的构建测试。
@@ -117,6 +118,7 @@ python -m pytest tests
 - 2026-10-23：主页改为「分类标签 + 置顶 + 最新 20 条」；新增 `/all/` 聚合页；内容摘要统一去除 HTML 标签。
 - 2026-10-24：新增 `/ranking/` 赞数排行与全站统计条；单篇显示赞同/评论/字数/阅读时长；统计写入 `data/zhihu_stats.json`，并预留 GoatCounter 站内浏览量。
 - 2026-10-24：接入 Giscus 站内点赞/评论；构建前从 GitHub Discussions 读取 👍 写入 `data/likes.json`，排行页与单篇显示站内赞。
+- 2026-10-24：全站统一白底；两站关于页结构对齐（常用链接、知乎归档、GitHub 贡献图）。
 
 ## 内容与版权
 

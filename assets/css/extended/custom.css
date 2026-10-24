@@ -6,6 +6,11 @@ body {
   letter-spacing: 0.01em;
 }
 
+/* 全站统一白底：列表页与文章页使用同一背景 */
+.list {
+  background: var(--theme);
+}
+
 /* 首页与列表页：去掉卡片感，改为分隔线 */
 .post-entry {
   background: transparent;
@@ -266,5 +271,18 @@ body {
   margin: 0 0 1rem;
   color: var(--secondary);
   font-size: 0.9rem;
+}
+
+/* GitHub 贡献图：metrics 生成的 SVG 是浅色样式，统一放在白色卡片里 */
+.github-metrics {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
 }
 

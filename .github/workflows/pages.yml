@@ -35,6 +35,31 @@ jobs:
           hugo-version: "0.168.0"
           extended: true
 
+      - name: Generate GitHub metrics
+        uses: lowlighter/metrics@65836723097537a54cd8eb90f61839426b4266b6 # v3.34
+        continue-on-error: true
+        with:
+          token: ${{ secrets.METRICS_TOKEN || secrets.GITHUB_TOKEN }}
+          user: visionjam
+          template: classic
+          base: ""
+          config_timezone: Asia/Shanghai
+          plugin_calendar: yes
+          plugin_calendar_limit: 1
+          filename: static/github-metrics.svg
+          output_action: none
+          config_output: svg
+
+      - name: Copy metrics SVG
+        run: |
+          if [ -f /metrics_renders/static/github-metrics.svg ]; then
+            mkdir -p static
+            cp /metrics_renders/static/github-metrics.svg static/github-metrics.svg
+            echo "metrics SVG copied"
+          else
+            echo "metrics SVG not found; About page will show the fallback link"
+          fi
+
       - name: Fetch discussion likes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

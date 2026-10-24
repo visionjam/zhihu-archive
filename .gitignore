@@ -9,3 +9,4 @@ __pycache__/
 cookie*.txt
 zhihu_cookie*
 .env
+static/github-metrics.svg

@@ -225,6 +225,28 @@ def test_site_likes_show_on_post_and_ranking(
     assert "站内赞 4" in ranking
 
 
+def test_about_page_has_common_links_and_contributions(tmp_path):
+    public = build_site(tmp_path)
+    about = read_page(public, "about")
+
+    for needle in (
+        "GitHub",
+        "知乎",
+        "Gmail",
+        "QQ",
+        "博客",
+        "归档站",
+        "博客源码",
+        "归档站源码",
+        "RSS",
+        "GitHub 贡献",
+    ):
+        assert needle in about
+    assert "github.com/visionjam/visionjam.github.io" in about
+    assert "github.com/visionjam/zhihu-archive" in about
+    assert "在 GitHub 查看贡献" in about
+
+
 def test_single_page_shows_votes_words_and_reading_time(
     tmp_path, temp_bundles, temp_stats
 ):
