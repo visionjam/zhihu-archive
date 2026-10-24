@@ -31,6 +31,10 @@ menu:
       name: 排行
       url: /ranking/
       weight: 25
+    - identifier: stats
+      name: 统计
+      url: /stats/
+      weight: 27
     - identifier: search
       name: 搜索
       url: /search/
