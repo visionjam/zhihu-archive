@@ -484,3 +484,17 @@ def test_all_page_is_not_listed_in_archive_or_search_index(tmp_path):
 
     search_index = (public / "index.json").read_text(encoding="utf-8")
     assert "/all/" not in search_index
+
+
+def test_stats_page_and_entry_links(tmp_path):
+    public = build_site(tmp_path)
+    stats = read_page(public, "stats")
+    home = read_page(public)
+    ranking = read_page(public, "ranking")
+
+    for needle in ("发文频率", "更新热力图", "写作节奏", "最近更新", "年度回顾"):
+        assert needle in stats
+    assert "stats-cell" in stats
+    assert 'href="/zhihu-archive/stats/"' in home
+    assert 'href="/zhihu-archive/stats/"' in ranking
+    assert "统计 →" in home

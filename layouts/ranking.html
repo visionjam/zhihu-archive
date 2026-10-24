@@ -48,6 +48,7 @@
   · 总字数 {{ lang.FormatNumber 0 ($totals.words | default 0) }}
   · 总赞 {{ lang.FormatNumber 0 ($totals.votes | default 0) }}
   · 站内赞 {{ lang.FormatNumber 0 $siteLikesTotal }}
+  · <a href="{{ "stats/" | relURL }}">统计 →</a>
 </p>
 
 {{- if $entries }}

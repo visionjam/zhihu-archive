@@ -27,6 +27,7 @@ VisionJam 的知乎回答、想法与文章归档站。归档站与博客平行�
 
 - 主页按标签切换：`主页 / 全部 / 回答 / 文章 / 想法`。
 - 「主页」只列最新的回答和文章（默认 20 条，可用 `params.homeLimit` 调整）；「全部」把回答、文章、想法混排。
+- 简介下方显示全站统计条（收录数、分类、字数、知乎赞、站内赞），末尾有「统计 →」入口。
 - 置顶内容在 `data/pinned.yml` 中维护，按文件顺序显示在主页简介下方，支持站内路径和外部链接。同步会重写文章 front matter，所以置顶不要写在文章里。
 
 ## 站点结构（自定义部分）
@@ -35,6 +36,8 @@ VisionJam 的知乎回答、想法与文章归档站。归档站与博客平行�
 - `layouts/_partials/type_tabs.html`：首页与各列表页顶部的分类标签。
 - `layouts/_partials/home_pinned.html` + `data/pinned.yml`：主页置顶区。
 - `content/ranking/_index.md` + `layouts/ranking.html`：`/ranking/` 排行 section，从 `data/zhihu_stats.json` 读取并排序；支持 全部/回答/文章/想法 筛选（`?type=answers` 等）。
+- `content/stats/_index.md` + `layouts/stats.html`：`/stats/` 统计页，按知乎原始发布时间统计发文频率、更新热力图、写作节奏和最近更新；数据来自 `data/zhihu_stats.json` 与页面 `lastmod`。
+- `layouts/_partials/site_stats.html`：主页全站统计条，读取 `data/zhihu_stats.json` 与 `data/likes.json`，并链接到 `/stats/`。
 - `data/zhihu_stats.json`：同步生成的统计文件（赞、评论、字数、阅读时长）；`python tools/sync.py --refresh-stats` 可在不联网时从本地正文与缓存重建。
 - `layouts/single.html` + `layouts/_partials/zhihu_stats.html`：单篇标题下的统计行（含站内赞）。
 - `layouts/_partials/comments.html`：Giscus 点赞/评论，仅知乎内容页。

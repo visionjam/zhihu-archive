@@ -69,6 +69,7 @@
 {{- end }}
 
 {{- if $isHome }}
+{{- partial "site_stats.html" . }}
 {{- partial "home_pinned.html" . }}
 <h2 class="home-section-title">最新</h2>
 {{- end }}
