@@ -65,6 +65,29 @@ body {
   color: #8fb8da;
 }
 
+/* 文章页顶部分类与标签 */
+.post-tags-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.post-tags-label {
+  color: var(--secondary);
+  font-size: 14px;
+  line-height: 34px;
+}
+
+.post-tags-top .post-tags {
+  gap: 8px;
+}
+
+.post-tags-top + .post-tags-top {
+  margin-top: 8px;
+}
+
 /* 移动端：导航换行，避免横向滚动 */
 @media screen and (max-width: 600px) {
   .header-nav {
