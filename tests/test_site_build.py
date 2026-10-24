@@ -148,6 +148,11 @@ def test_ranking_page_sorts_by_votes_and_shows_totals(tmp_path, temp_stats):
     for kind in ("answers", "articles", "pins"):
         assert f'data-filter="{kind}"' in flat
         assert f'data-kind="{kind}"' in flat
+    for mode in ("zhihu", "site", "time"):
+        assert f'data-sort="{mode}"' in flat
+    assert "data-voteup=" in flat
+    assert "data-site-likes=" in flat
+    assert "data-date=" in flat
     assert "已删除" in flat
     assert "gc.zgo.at" not in ranking
 

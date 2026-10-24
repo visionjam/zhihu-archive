@@ -203,6 +203,33 @@ body {
 }
 
 /* 排行榜 */
+.ranking-filter {
+  margin-bottom: 0.8rem;
+}
+
+.ranking-sort {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin: 0 0 1.4rem;
+  color: var(--secondary);
+  font-size: 0.9rem;
+}
+
+.ranking-sort a {
+  color: var(--secondary);
+}
+
+.ranking-sort a:hover {
+  color: var(--primary);
+}
+
+.ranking-sort a.active {
+  color: var(--primary);
+  font-weight: 600;
+}
+
 .site-stats {
   margin: 0 0 1.4rem;
   color: var(--secondary);

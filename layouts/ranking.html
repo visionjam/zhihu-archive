@@ -33,6 +33,13 @@
   <a class="type-tab" href="?type=pins" data-filter="pins">想法</a>
 </nav>
 
+<div class="ranking-sort" aria-label="排序方式">
+  <span class="ranking-sort-label">排序：</span>
+  <a href="?sort=zhihu" data-sort="zhihu" class="active" aria-current="page">知乎赞</a>
+  <a href="?sort=site" data-sort="site">站内赞</a>
+  <a href="?sort=time" data-sort="time">时间</a>
+</div>
+
 <p class="site-stats">
   收录 {{ lang.FormatNumber 0 ($totals.items | default 0) }} 篇
   · 回答 {{ lang.FormatNumber 0 (index $byKind "answers" | default 0) }}
@@ -46,7 +53,7 @@
 {{- if $entries }}
 <ol class="ranking-list">
   {{- range $index, $entry := $entries }}
-  <li class="ranking-item" data-kind="{{ $entry.kind }}">
+  <li class="ranking-item" data-kind="{{ $entry.kind }}" data-voteup="{{ $entry.voteup_count }}" data-site-likes="{{ $entry.site_likes | default 0 }}" data-date="{{ $entry.created }}">
     <span class="rank">{{ add $index 1 }}</span>
     <div class="rank-main">
       <a class="rank-title" href="{{ strings.TrimPrefix "/" $entry.rel_path | relURL }}">{{ $entry.title }}</a>
@@ -65,8 +72,18 @@
 <script>
 (function () {
   var tabs = document.querySelectorAll('.ranking-filter .type-tab');
+  var list = document.querySelector('.ranking-list');
   var items = document.querySelectorAll('.ranking-list .ranking-item');
   var allowed = ['all', 'answers', 'articles', 'pins'];
+
+  function renumber() {
+    var visible = 0;
+    list.querySelectorAll('.ranking-item').forEach(function (item) {
+      if (!item.hidden) {
+        item.querySelector('.rank').textContent = ++visible;
+      }
+    });
+  }
 
   function apply(filter) {
     tabs.forEach(function (tab) {
@@ -81,6 +98,7 @@
     items.forEach(function (item) {
       item.hidden = filter !== 'all' && item.getAttribute('data-kind') !== filter;
     });
+    renumber();
   }
 
   tabs.forEach(function (tab) {
@@ -101,6 +119,76 @@
   var initial = new URLSearchParams(location.search).get('type');
   if (allowed.indexOf(initial) !== -1) {
     apply(initial);
+  }
+})();
+</script>
+
+<script>
+(function () {
+  var list = document.querySelector('.ranking-list');
+  if (!list) return;
+  var items = Array.prototype.slice.call(
+    list.querySelectorAll('.ranking-item')
+  );
+  var tabs = document.querySelectorAll('.ranking-sort a');
+  var modes = ['zhihu', 'site', 'time'];
+
+  function value(item, mode) {
+    if (mode === 'time') return item.getAttribute('data-date') || '';
+    if (mode === 'site') return parseFloat(item.getAttribute('data-site-likes')) || 0;
+    return parseFloat(item.getAttribute('data-voteup')) || 0;
+  }
+
+  function applySort(mode) {
+    tabs.forEach(function (tab) {
+      var active = tab.getAttribute('data-sort') === mode;
+      tab.classList.toggle('active', active);
+      if (active) {
+        tab.setAttribute('aria-current', 'page');
+      } else {
+        tab.removeAttribute('aria-current');
+      }
+    });
+    items.sort(function (a, b) {
+      var av = value(a, mode);
+      var bv = value(b, mode);
+      if (mode === 'time') {
+        if (av === bv) return 0;
+        return av < bv ? 1 : -1;
+      }
+      if (bv !== av) return bv - av;
+      var ad = a.getAttribute('data-date') || '';
+      var bd = b.getAttribute('data-date') || '';
+      return ad < bd ? 1 : ad > bd ? -1 : 0;
+    });
+    items.forEach(function (item) {
+      list.appendChild(item);
+    });
+    var visible = 0;
+    list.querySelectorAll('.ranking-item').forEach(function (item) {
+      if (!item.hidden) {
+        item.querySelector('.rank').textContent = ++visible;
+      }
+    });
+    var url = new URL(location.href);
+    if (mode === 'zhihu') {
+      url.searchParams.delete('sort');
+    } else {
+      url.searchParams.set('sort', mode);
+    }
+    history.replaceState(null, '', url);
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function (event) {
+      event.preventDefault();
+      applySort(tab.getAttribute('data-sort'));
+    });
+  });
+
+  var initial = new URLSearchParams(location.search).get('sort');
+  if (modes.indexOf(initial) !== -1) {
+    applySort(initial);
   }
 })();
 </script>
