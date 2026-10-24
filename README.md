@@ -1,6 +1,6 @@
 # 知乎归档
 
-VisionJam 的知乎回答、想法与文章归档站。归档站与博客平行独立：博客负责写作，这里负责备份与展示。
+VisionJam 的知乎回答、想法与文章归档站。归档站与博客平行独立：博客负责日常写作，这里负责备份与展示；知乎文章草稿也可以在本仓库的本机目录中写作（见下）。
 
 - 归档站：<https://visionjam.github.io/zhihu-archive/>
 - 博客：<https://visionjam.github.io/>
@@ -15,6 +15,13 @@ VisionJam 的知乎回答、想法与文章归档站。归档站与博客平行�
 - 已从知乎删除的内容继续保留，并在页面上标注。
 - 第一次全量、之后增量；中断后可续跑。
 - Cookie 只留本机，GitHub Actions 不持有任何凭证，只负责构建与部署。
+
+## 知乎文章写作（本机）
+
+- 可以在 `.local/drafts/<slug>/` 写知乎文章草稿：正文 `index.md` + 同目录 `assets/` 配图。`.local/` 已被 `.gitignore` 忽略，不会进入仓库或站点。
+- 发布到知乎使用 Claude Code 的全局 skill `publish-to-zhihu`：上传图片 → 生成知乎导入版 md → 在网页版知乎导入并发布。
+- Cookie 和图片映射只留在本机 `.local/`，发布完删除 Cookie。
+- 发布成功后运行 `python tools/sync.py`，同步工具会把文章收进 `content/articles/`；不要手工把草稿放进 `content/`。
 
 ## 主页结构
 
