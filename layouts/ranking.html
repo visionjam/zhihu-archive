@@ -26,22 +26,27 @@
   {{- end }}
 </header>
 
-<section class="site-stats">
-  <p>
-    收录 <strong>{{ lang.FormatNumber 0 ($totals.items | default 0) }}</strong> 篇
-    · 回答 {{ lang.FormatNumber 0 (index $byKind "answers" | default 0) }}
-    / 文章 {{ lang.FormatNumber 0 (index $byKind "articles" | default 0) }}
-    / 想法 {{ lang.FormatNumber 0 (index $byKind "pins" | default 0) }}
-    · 总字数 <strong>{{ lang.FormatNumber 0 ($totals.words | default 0) }}</strong>
-    · 总赞 <strong>{{ lang.FormatNumber 0 ($totals.votes | default 0) }}</strong>
-    · 站内赞 <strong>{{ lang.FormatNumber 0 $siteLikesTotal }}</strong>
-  </p>
-</section>
+<nav class="type-tabs ranking-filter" aria-label="排行筛选">
+  <a class="type-tab active" href="?type=all" data-filter="all" aria-current="page">全部</a>
+  <a class="type-tab" href="?type=answers" data-filter="answers">回答</a>
+  <a class="type-tab" href="?type=articles" data-filter="articles">文章</a>
+  <a class="type-tab" href="?type=pins" data-filter="pins">想法</a>
+</nav>
+
+<p class="site-stats">
+  收录 {{ lang.FormatNumber 0 ($totals.items | default 0) }} 篇
+  · 回答 {{ lang.FormatNumber 0 (index $byKind "answers" | default 0) }}
+  / 文章 {{ lang.FormatNumber 0 (index $byKind "articles" | default 0) }}
+  / 想法 {{ lang.FormatNumber 0 (index $byKind "pins" | default 0) }}
+  · 总字数 {{ lang.FormatNumber 0 ($totals.words | default 0) }}
+  · 总赞 {{ lang.FormatNumber 0 ($totals.votes | default 0) }}
+  · 站内赞 {{ lang.FormatNumber 0 $siteLikesTotal }}
+</p>
 
 {{- if $entries }}
 <ol class="ranking-list">
   {{- range $index, $entry := $entries }}
-  <li class="ranking-item{{ if lt $index 3 }} rank-top{{ end }}">
+  <li class="ranking-item" data-kind="{{ $entry.kind }}">
     <span class="rank">{{ add $index 1 }}</span>
     <div class="rank-main">
       <a class="rank-title" href="{{ strings.TrimPrefix "/" $entry.rel_path | relURL }}">{{ $entry.title }}</a>
@@ -56,5 +61,48 @@
 {{- else }}
 <p>暂无统计数据。</p>
 {{- end }}
+
+<script>
+(function () {
+  var tabs = document.querySelectorAll('.ranking-filter .type-tab');
+  var items = document.querySelectorAll('.ranking-list .ranking-item');
+  var allowed = ['all', 'answers', 'articles', 'pins'];
+
+  function apply(filter) {
+    tabs.forEach(function (tab) {
+      var active = tab.getAttribute('data-filter') === filter;
+      tab.classList.toggle('active', active);
+      if (active) {
+        tab.setAttribute('aria-current', 'page');
+      } else {
+        tab.removeAttribute('aria-current');
+      }
+    });
+    items.forEach(function (item) {
+      item.hidden = filter !== 'all' && item.getAttribute('data-kind') !== filter;
+    });
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function (event) {
+      event.preventDefault();
+      var filter = tab.getAttribute('data-filter');
+      apply(filter);
+      var url = new URL(location.href);
+      if (filter === 'all') {
+        url.searchParams.delete('type');
+      } else {
+        url.searchParams.set('type', filter);
+      }
+      history.replaceState(null, '', url);
+    });
+  });
+
+  var initial = new URLSearchParams(location.search).get('type');
+  if (allowed.indexOf(initial) !== -1) {
+    apply(initial);
+  }
+})();
+</script>
 
 {{- end }}

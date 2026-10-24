@@ -140,11 +140,14 @@ def test_ranking_page_sorts_by_votes_and_shows_totals(tmp_path, temp_stats):
     mid = flat.index("TABTEST-RANK-MID")
     low = flat.index("TABTEST-RANK-LOW")
     assert high < mid < low
-    assert '<strong>3</strong>' in flat
-    assert '<strong>300</strong>' in flat
-    assert '<strong>15</strong>' in flat
+    assert "收录 3 篇" in flat
+    assert "总字数 300" in flat
+    assert "总赞 15" in flat
     assert 'href="/zhihu-archive/answers/test-low/"' in flat
-    assert 'class="ranking-item rank-top"' in flat
+    assert "rank-top" not in flat
+    for kind in ("answers", "articles", "pins"):
+        assert f'data-filter="{kind}"' in flat
+        assert f'data-kind="{kind}"' in flat
     assert "已删除" in flat
     assert "gc.zgo.at" not in ranking
 
@@ -220,7 +223,6 @@ def test_site_likes_show_on_post_and_ranking(
 
     ranking = re.sub(r"\s+", " ", read_page(public, "ranking"))
     assert "站内赞 4" in ranking
-    assert "站内赞 <strong>4</strong>" in ranking
 
 
 def test_single_page_shows_votes_words_and_reading_time(
