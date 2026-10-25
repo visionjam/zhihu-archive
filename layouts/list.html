@@ -52,6 +52,7 @@
 {{- if $isHome }}
 {{- $allHomePages := where site.RegularPages "Type" "in" (slice "answers" "articles") }}
 {{- $allHomePages = where $allHomePages "Params.hiddenInHomeList" "!=" "true" }}
+{{- $allHomePages = sort $allHomePages "Date" "desc" }}
 {{- $moreHome = gt (len $allHomePages) $homeLimit }}
 {{- $pages = first $homeLimit $allHomePages }}
 {{- else if and (eq .Kind "section") (eq .Section "all") }}
