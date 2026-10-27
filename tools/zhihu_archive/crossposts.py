@@ -28,6 +28,7 @@ def load_crossposts(path: Path) -> dict[str, dict[str, str]]:
         result[str(key)] = {
             "url": url,
             "title": str(value.get("title") or "").strip(),
+            "blog_title": str(value.get("blog_title") or "").strip(),
         }
     return result
 

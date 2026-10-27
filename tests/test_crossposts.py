@@ -60,4 +60,6 @@ def test_load_crossposts_skips_entries_without_url(tmp_path):
         ),
         encoding="utf-8",
     )
-    assert load_crossposts(path) == {"1": {"url": "https://example.com/", "title": ""}}
+    assert load_crossposts(path) == {
+        "1": {"url": "https://example.com/", "title": "", "blog_title": ""}
+    }

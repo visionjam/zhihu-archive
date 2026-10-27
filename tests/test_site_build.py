@@ -386,6 +386,47 @@ def test_crosspost_canonical_and_notice(tmp_path, temp_bundles):
     assert "本文同时发布于博客" in page
 
 
+def test_crosspost_notice_uses_blog_title(tmp_path, temp_bundles):
+    bundle = temp_bundles(
+        "articles",
+        "_crosspost_title",
+        "TABTEST-CROSSPOST-TITLE",
+        zhihu_id="_crosspost_title",
+    )
+    path = bundle / "index.md"
+    text = path.read_text(encoding="utf-8")
+    text = text.replace(
+        'zhihu_id: "_crosspost_title"',
+        'canonicalURL: "https://visionjam.github.io/posts/example/"\n'
+        "ShowCanonicalLink: true\n"
+        'zhihu_id: "_crosspost_title"',
+    )
+    path.write_text(text, encoding="utf-8")
+
+    data = ROOT / "data" / "crossposts.json"
+    backup = data.read_bytes()
+    data.write_text(
+        json.dumps(
+            {
+                "_crosspost_title": {
+                    "url": "https://visionjam.github.io/posts/example/",
+                    "title": "归档标题",
+                    "blog_title": "TABTEST-BLOG-TITLE",
+                }
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    try:
+        public = build_site(tmp_path)
+        page = read_page(public, "articles", "_crosspost_title")
+        assert "TABTEST-BLOG-TITLE" in page
+        assert "本文同时发布于博客" in page
+    finally:
+        data.write_bytes(backup)
+
+
 def test_footer_mentions_source(tmp_path):
     subprocess.run(
         [

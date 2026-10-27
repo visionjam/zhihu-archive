@@ -10,7 +10,7 @@ VisionJam 的知乎回答、想法与文章归档站。归档站与博客平行�
 
 - 同步本人在知乎发布的**回答、想法、文章**；想法转发按知乎页面呈现归档。
 - 每篇内容生成一个 page bundle，图片下载到本地，保留原文链接。
-- 与博客重复发布的文章会在 frontmatter 写入 `canonicalURL`，页面显示「本文同时发布于博客」；映射在 `data/crossposts.json`。
+- 与博客重复发布的文章会在 frontmatter 写入 `canonicalURL`，页面显示「本文同时发布于博客：<博客标题>」；映射由博客仓库的 `python tools/crossposts.py` 按归一化标题自动生成，也支持手工补条目。
 - 每篇标注知乎发布时间、最后编辑时间（仅当与发布时间不同）、赞同数、评论数、字数和预计阅读时长；`/ranking/` 按赞同数排行，并显示全站统计条。
 - 每篇底部接入 Giscus：登录 GitHub 后可点 👍 或评论；站内赞数在构建前从 GitHub Discussions 读取。
 - 已从知乎删除的内容继续保留，并在页面上标注。
@@ -42,7 +42,7 @@ VisionJam 的知乎回答、想法与文章归档站。归档站与博客平行�
 - `layouts/_partials/site_stats.html`：主页全站统计条，读取 `data/zhihu_stats.json` 与 `data/likes.json`，并链接到 `/stats/` 与 `/ranking/`。
 - `layouts/_partials/header.html`：顶部导航覆盖，把 `params.group: more` 的菜单项收进「更多」折叠面板；`layouts/_partials/menu_link.html` 复用菜单链接渲染。
 - `data/zhihu_stats.json`：同步生成的统计文件（赞、评论、字数、阅读时长）；`python tools/sync.py --refresh-stats` 可在不联网时从本地正文与缓存重建。
-- `data/crossposts.json`：知乎文章 ID → 博客 URL 的映射；`python tools/sync.py --normalize` 会把 `canonicalURL` 与 `ShowCanonicalLink` 写入已有页面，并在同步结束时自动维护。
+- `data/crossposts.json`：知乎文章 ID → 博客 URL / 博客标题的映射，由博客仓库 `tools/crossposts.py` 自动生成；`python tools/sync.py --normalize` 会把 `canonicalURL` 与 `ShowCanonicalLink` 写入已有页面，并在同步结束时自动维护。
 - `layouts/rss.xml`：RSS 覆盖模板，只收录回答/文章/想法并补 `lastBuildDate`；条数由 `services.rss.limit`（当前 50）控制。
 - `layouts/single.html` + `layouts/_partials/zhihu_stats.html`：单篇标题下的统计行（含站内赞）。
 - `layouts/_partials/comments.html`：Giscus 点赞/评论，仅知乎内容页。
@@ -115,6 +115,10 @@ schtasks /Create /SC DAILY /TN "ZhihuArchiveSync" /TR "\"%CD%\sync.bat\" --sched
 
 `--scheduled` 让脚本不等待按键，适合任务计划；手动双击 `sync.bat` 则会在结束时暂停。电脑开机时才运行；失败会记录到 `.local\logs\`。
 
+## 发布前审稿
+
+归档是知乎原文的副本，原则上不改写正文。同步/推送前只检查同步和格式层面的低级错误：乱码、截断、Markdown 表格或链接损坏、图片丢失。语言风格、网络梗、口语和情绪表达一律保留；确实要改文字，先改知乎原文再重新同步，不在归档副本上做语言润色。
+
 ## 隐私与撤回
 
 - 每次推送前自动扫描 `content/`：Cookie/密钥/本机路径/代理配置为硬拦截；电话、邮箱、内网地址等列为需确认。
@@ -145,7 +149,7 @@ CI 在构建前运行 `python -m pytest -q`；测试覆盖同步、渲染、图�
 - 站内赞：Giscus 👍，构建前取数；目前为 0（尚未有人点赞），点赞后需下一次推送或每日 04:00 UTC 构建才更新。
 - 浏览量：知乎接口不提供；GoatCounter 未启用。
 - 知乎赞/评论数：来自同步快照，具体时间见 `data/zhihu_stats.json` 的 `generated_at`；运行 `python tools/sync.py` 刷新。
-- 交叉发布：`data/crossposts.json` 目前维护 5 篇 Android 指南；新增交叉发布文章后运行 `python tools/sync.py --normalize`，再把映射补进该文件。
+- 交叉发布：`data/crossposts.json` 目前维护 5 篇 Android 指南；新增交叉发布文章后，在博客仓库运行 `python tools/crossposts.py --archive-root ../zhihu-archive`（自动匹配并写两侧数据），再运行 `python tools/sync.py --normalize` 或正常同步。
 
 ## 内容与版权
 
