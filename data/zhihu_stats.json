@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-10-24T11:20:41+00:00",
+  "generated_at": "2026-10-27T05:28:53+00:00",
   "totals": {
-    "items": 107,
-    "words": 47316,
-    "votes": 83,
+    "items": 109,
+    "words": 47805,
+    "votes": 87,
     "comments": 48,
     "by_kind": {
-      "answers": 12,
+      "answers": 13,
       "articles": 8,
-      "pins": 87
+      "pins": 88
     }
   },
   "items": {
@@ -142,6 +142,19 @@
       "word_count": 335,
       "reading_minutes": 1
     },
+    "answers:2098186299488351377": {
+      "kind": "answers",
+      "id": "2098186299488351377",
+      "title": "你最讨厌的话是什么？",
+      "url": "https://www.zhihu.com/question/267189107/answer/2098186299488351377",
+      "rel_path": "/answers/2098186299488351377/",
+      "created": "2026-10-26",
+      "deleted": false,
+      "voteup_count": 0,
+      "comment_count": 0,
+      "word_count": 377,
+      "reading_minutes": 1
+    },
     "answers:3570888126": {
       "kind": "answers",
       "id": "3570888126",
@@ -202,7 +215,7 @@
       "rel_path": "/articles/2089739625048945495/",
       "created": "2026-10-03",
       "deleted": false,
-      "voteup_count": 10,
+      "voteup_count": 12,
       "comment_count": 0,
       "word_count": 5988,
       "reading_minutes": 15
@@ -215,7 +228,7 @@
       "rel_path": "/articles/2097400063945348446/",
       "created": "2026-10-24",
       "deleted": false,
-      "voteup_count": 0,
+      "voteup_count": 1,
       "comment_count": 0,
       "word_count": 2577,
       "reading_minutes": 7
@@ -254,7 +267,7 @@
       "rel_path": "/articles/2097400787584422419/",
       "created": "2026-10-24",
       "deleted": false,
-      "voteup_count": 0,
+      "voteup_count": 1,
       "comment_count": 0,
       "word_count": 3633,
       "reading_minutes": 10
@@ -1401,6 +1414,19 @@
       "voteup_count": 0,
       "comment_count": 0,
       "word_count": 33,
+      "reading_minutes": 1
+    },
+    "pins:2098354600847923060": {
+      "kind": "pins",
+      "id": "2098354600847923060",
+      "title": "有些程序员和流水线工人也没什么大的区别，在前AI的不可替代性在于别人的智力或者训",
+      "url": "https://www.zhihu.com/pin/2098354600847923060",
+      "rel_path": "/pins/2098354600847923060/",
+      "created": "2026-10-27",
+      "deleted": false,
+      "voteup_count": 0,
+      "comment_count": 0,
+      "word_count": 112,
       "reading_minutes": 1
     }
   }
