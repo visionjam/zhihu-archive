@@ -525,5 +525,6 @@ def test_stats_page_and_entry_links(tmp_path):
         assert needle in stats
     assert "stats-cell" in stats
     assert 'href="/zhihu-archive/stats/"' in home
+    assert 'href="/zhihu-archive/ranking/"' in home
     assert 'href="/zhihu-archive/stats/"' in ranking
-    assert "统计 →" in home
+    assert 'href="/zhihu-archive/ranking/"' in stats

@@ -7,4 +7,4 @@
 {{- range $path, $entry := $likeItems -}}
   {{- $likes = add $likes ($entry.likes | default 0) -}}
 {{- end -}}
-<p class="site-stats">收录 {{ lang.FormatNumber 0 ($totals.items | default 0) }} 篇 · 回答 {{ lang.FormatNumber 0 (index $byKind "answers" | default 0) }} / 文章 {{ lang.FormatNumber 0 (index $byKind "articles" | default 0) }} / 想法 {{ lang.FormatNumber 0 (index $byKind "pins" | default 0) }} · {{ lang.FormatNumber 0 ($totals.words | default 0) }} 字 · 知乎赞 {{ lang.FormatNumber 0 ($totals.votes | default 0) }} · 站内赞 {{ lang.FormatNumber 0 $likes }} · <a href="{{ "stats/" | relURL }}">统计 →</a></p>
+<p class="site-stats">收录 {{ lang.FormatNumber 0 ($totals.items | default 0) }} 篇 · 回答 {{ lang.FormatNumber 0 (index $byKind "answers" | default 0) }} / 文章 {{ lang.FormatNumber 0 (index $byKind "articles" | default 0) }} / 想法 {{ lang.FormatNumber 0 (index $byKind "pins" | default 0) }} · {{ lang.FormatNumber 0 ($totals.words | default 0) }} 字 · 知乎赞 {{ lang.FormatNumber 0 ($totals.votes | default 0) }} · 站内赞 {{ lang.FormatNumber 0 $likes }} · <a href="{{ "stats/" | relURL }}">统计</a> · <a href="{{ "ranking/" | relURL }}">排行</a> →</p>

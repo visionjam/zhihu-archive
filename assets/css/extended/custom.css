@@ -31,6 +31,21 @@ body {
   border-bottom: none;
 }
 
+/* 面包屑：比主题默认值更易读，与正文辅助信息协调 */
+.breadcrumbs,
+.breadcrumbs a {
+  font-size: 17px;
+}
+
+/* 统计页内的次级入口，避免灰色小字被忽略 */
+.stats-note a {
+  color: #2f5d8a;
+}
+
+:root[data-theme="dark"] .stats-note a {
+  color: #8fb8da;
+}
+
 /* 标题使用衬线字体，增强阅读气质 */
 .post-title,
 .entry-header h2,
@@ -97,6 +112,7 @@ body {
 
   .menu {
     display: flex;
+    flex: 0 0 100%;
     flex-wrap: wrap;
     white-space: normal;
     overflow-x: visible;
