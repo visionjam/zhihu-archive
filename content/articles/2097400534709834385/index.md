@@ -4,6 +4,8 @@ date: 2026-10-24
 lastmod: 2026-10-24
 type: articles
 zhihu_id: "2097400534709834385"
+canonicalURL: "https://visionjam.github.io/android-guide/02-system-settings-and-privacy/"
+ShowCanonicalLink: true
 zhihu_url: "https://zhuanlan.zhihu.com/p/2097400534709834385"
 deleted: false
 archived_at: 2026-10-24

@@ -27,7 +27,9 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     root = Path(args.root).resolve()
-    allowlist = load_allowlist(root / args.allowlist)
+    allowlist = load_allowlist(root / "tools" / "privacy_allowlist.txt") | load_allowlist(
+        root / args.allowlist
+    )
     report = scan_paths(root, args.paths, allowlist)
 
     for finding in report.hard:

@@ -348,6 +348,44 @@ def test_katex_assets_exist():
     assert (ROOT / "static" / "katex" / "auto-render.min.js").exists()
 
 
+def test_rss_excludes_undated_pages_and_has_last_build_date(tmp_path):
+    public = build_site(tmp_path)
+    rss = (public / "index.xml").read_text(encoding="utf-8")
+
+    assert "<title>关于</title>" not in rss
+    assert "0001-01-01" not in rss
+    assert "<lastBuildDate>" in rss
+    assert "<item>" in rss
+
+
+def test_crosspost_canonical_and_notice(tmp_path, temp_bundles):
+    bundle = temp_bundles(
+        "articles",
+        "_crosspost_test",
+        "TABTEST-CROSSPOST",
+        zhihu_id="_crosspost_test",
+    )
+    path = bundle / "index.md"
+    text = path.read_text(encoding="utf-8")
+    text = text.replace(
+        'zhihu_id: "_crosspost_test"',
+        'canonicalURL: "https://visionjam.github.io/android-guide/01-optimization-mindset-and-checkup/"\n'
+        "ShowCanonicalLink: true\n"
+        'zhihu_id: "_crosspost_test"',
+    )
+    path.write_text(text, encoding="utf-8")
+
+    public = build_site(tmp_path)
+    page = read_page(public, "articles", "_crosspost_test")
+
+    assert (
+        'rel="canonical" '
+        'href="https://visionjam.github.io/android-guide/01-optimization-mindset-and-checkup/"'
+        in page
+    )
+    assert "本文同时发布于博客" in page
+
+
 def test_footer_mentions_source(tmp_path):
     subprocess.run(
         [

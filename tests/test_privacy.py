@@ -1,4 +1,8 @@
+from pathlib import Path
+
 from zhihu_archive.privacy import load_allowlist, scan_paths
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_cookie_value_is_hard_finding(tmp_path):
@@ -56,3 +60,9 @@ def test_load_allowlist_ignores_comments(tmp_path):
     path = tmp_path / "allow.txt"
     path.write_text("# comment\nphone_cn\ta.md\t13800138000\n", encoding="utf-8")
     assert load_allowlist(path) == {"phone_cn\ta.md\t13800138000"}
+
+
+def test_repo_allowlist_covers_public_about_emails():
+    allow = load_allowlist(ROOT / "tools" / "privacy_allowlist.txt")
+    report = scan_paths(ROOT, ["content/about.md"], allow)
+    assert report.review == []

@@ -14,6 +14,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from zhihu_archive.client import AuthError, RateLimitError, ZhihuClient
 from zhihu_archive.cookie import CookieFormatError, load_cookie
+from zhihu_archive.crossposts import load_crossposts
+from zhihu_archive.normalize import normalize_content
 from zhihu_archive.privacy import IMAGE_EXTS, load_allowlist, scan_paths
 from zhihu_archive.state import SyncState
 from zhihu_archive.stats import build_stats, load_stats, write_stats
@@ -68,7 +70,9 @@ def publish_if_clean(
     images_approved: bool = False,
 ) -> bool:
     root = Path(root).resolve()
-    allowlist = load_allowlist(Path(state_dir) / "scan-allowlist.txt")
+    allowlist = load_allowlist(ROOT / "tools" / "privacy_allowlist.txt") | load_allowlist(
+        Path(state_dir) / "scan-allowlist.txt"
+    )
     try:
         relative = Path(content_root).resolve().relative_to(root).as_posix()
     except ValueError:
@@ -124,6 +128,8 @@ def load_config() -> dict:
     config["state_dir"] = str((ROOT / config["state_dir"]).resolve())
     if config.get("stats_file"):
         config["stats_file"] = str((ROOT / config["stats_file"]).resolve())
+    if config.get("crossposts_file"):
+        config["crossposts_file"] = str((ROOT / config["crossposts_file"]).resolve())
     return config
 
 
@@ -134,6 +140,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--refresh-stats",
         action="store_true",
         help="不联网，仅根据本地内容与缓存重建统计文件",
+    )
+    parser.add_argument(
+        "--normalize",
+        action="store_true",
+        help="不联网，刷新交叉发布/canonical、math 标记与相邻重复图片",
     )
     parser.add_argument("--sample", type=int, default=0, help="每种类型只打印 N 条标题")
     parser.add_argument("--dry-run", action="store_true", help="只计算，不写文件")
@@ -172,6 +183,16 @@ def main(argv: list[str] | None = None) -> int:
         )
         write_stats(stats_path, data)
         print(f"统计已重建：{data['totals']['items']} 条 -> {stats_path}")
+        return 0
+
+    if args.normalize:
+        config = load_config()
+        crossposts_file = config.get("crossposts_file")
+        mapping = (
+            load_crossposts(Path(crossposts_file)) if crossposts_file else {}
+        )
+        changed = normalize_content(Path(config["content_root"]), mapping)
+        print(f"内容整理完成：{changed} 个页面")
         return 0
 
     if args.check:

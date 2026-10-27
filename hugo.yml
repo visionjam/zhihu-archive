@@ -11,6 +11,10 @@ buildExpired: false
 enableEmoji: true
 pygmentsUseClasses: true
 
+services:
+  rss:
+    limit: 50
+
 pagination:
   pagerSize: 20
 
@@ -61,6 +65,7 @@ params:
   description: "VisionJam 的知乎回答、想法与文章归档。"
   author: "VisionJam"
   DateFormat: "2006-01-02"
+  CanonicalLinkText: "本文同时发布于博客"
   mainSections:
     - answers
     - articles

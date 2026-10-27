@@ -43,7 +43,7 @@ summary: "文章 · 2026-10-03 · 这是”Zemax 入门”系列的下篇：用�
 
 典型的变焦系统由四部分构成（从物方到像方）：
 
-![image](./e5055bbc7a657579.jpg)![image](./e5055bbc7a657579.jpg)
+![image](./e5055bbc7a657579.jpg)
 
 *图 7-1 典型变焦系统的组元构成*
 
@@ -52,7 +52,7 @@ summary: "文章 · 2026-10-03 · 这是”Zemax 入门”系列的下篇：用�
 * **补偿组**：沿光轴移动，把像面”拉回”固定位置，保证整个变焦过程中成像始终落在探测器上；
 * **后固定组**：不动，最终成像并校正残余像差。
 
-![image](./d661a5aadc834502.jpg)![image](./d661a5aadc834502.jpg)
+![image](./d661a5aadc834502.jpg)
 
 *图 7-2 变焦过程：两组联动移动，焦距连续变化而像面保持不动*
 
@@ -75,7 +75,7 @@ summary: "文章 · 2026-10-03 · 这是”Zemax 入门”系列的下篇：用�
 
 **检查点**：此时镜头数据编辑器应与下图一致；状态栏 EFFL 显示 **98.5577 mm**。
 
-![image](./f9080eae164034a6.jpg)![image](./f9080eae164034a6.jpg)
+![image](./f9080eae164034a6.jpg)
 
 *图 8-1 打开样例并改完入瞳直径后的镜头数据编辑器*
 
@@ -95,7 +95,7 @@ summary: "文章 · 2026-10-03 · 这是”Zemax 入门”系列的下篇：用�
 | 10 | −53.285 | 105.000 | 空气 | ③ 后表面（后工作距） |
 | 11 | 无限 | — | — | 像面（IMA） |
 
-![image](./1940b4a171b2a372.jpg)![image](./1940b4a171b2a372.jpg)
+![image](./1940b4a171b2a372.jpg)
 
 *图 8-2 初始结构的 3D 布局图：三组双胶合透镜，光阑在第一、二组之间*
 
@@ -112,13 +112,13 @@ summary: "文章 · 2026-10-03 · 这是”Zemax 入门”系列的下篇：用�
 3. 把每个 THIC 的求解类型都设为**变量 V**，让优化时允许它们在不同组态取不同的值；
 4. 左上角会显示”活动：1/3”，可在三个组态之间切换查看。
 
-![image](./d1233e2b8943dbdd.jpg)![image](./d1233e2b8943dbdd.jpg)
+![image](./d1233e2b8943dbdd.jpg)
 
 *图 9-1 多重结构编辑器：THIC 操作数分别控制面 3、4、7、10 的厚度*
 
 1. 回到**镜头数据编辑器**，把除物面、光阑、像面以外的**所有曲率半径**求解类型都设成变量（V）。
 
-![image](./fab54a46df7bcdb9.jpg)![image](./fab54a46df7bcdb9.jpg)
+![image](./fab54a46df7bcdb9.jpg)
 
 *图 9-2 镜头数据编辑器：所有曲率半径已设为变量*
 
@@ -145,21 +145,21 @@ summary: "文章 · 2026-10-03 · 这是”Zemax 入门”系列的下篇：用�
 
 1. 加总长约束：插入 **TOTR**（第一面到像面的总长），配合 **OPLT**（”小于”约束）使用，控制总长不超过约 **145 mm**（对应要求”总长 ≤150 mm”，这里留一点余量），权重 1。
 
-![image](./6f4663ab91a28fdb.jpg)![image](./6f4663ab91a28fdb.jpg)
+![image](./6f4663ab91a28fdb.jpg)
 
 *图 10-1 优化向导：类型选 RMS 点列图，并勾选玻璃/空气的厚度边界*
 
-![image](./f0a58fee3b71ceed.jpg)![image](./f0a58fee3b71ceed.jpg)
+![image](./f0a58fee3b71ceed.jpg)
 
 *图 10-2 向导自动生成的初始评价函数：CONF 把操作数分成三个组态，边界操作数（MNCA/MXCA/MNCG/MXCG 等）控制曲率与厚度范围*
 
 **CONF 的作用域**：CONF 操作数管理它**之后**的所有操作数，直到遇到下一个 CONF 为止。所以每个组态的 EFFL 要写在对应 CONF 的后面。
 
-![image](./b5ea727c896f130f.jpg)![image](./b5ea727c896f130f.jpg)
+![image](./b5ea727c896f130f.jpg)
 
 *图 10-3 在组态 1 下插入 EFFL = 30*
 
-![image](./6cc9d3f5de06acfd.jpg)![image](./6cc9d3f5de06acfd.jpg)
+![image](./6cc9d3f5de06acfd.jpg)
 
 *图 10-4 用 TOTR + OPLT 控制总长*
 
@@ -167,11 +167,11 @@ summary: "文章 · 2026-10-03 · 这是”Zemax 入门”系列的下篇：用�
 
 **第一次优化**：打开 **优化 → 优化**（优化对话框），算法选**阻尼最小二乘法**，迭代次数用默认值，点**开始**。观察评价函数值一路下降，直到收敛（数值不再明显变化）。
 
-![image](./5ab5d9818fb42b76.jpg)![image](./5ab5d9818fb42b76.jpg)
+![image](./5ab5d9818fb42b76.jpg)
 
 *图 11-1 第一次优化后的镜头参数*
 
-![image](./5bad5a5308038430.jpg)![image](./5bad5a5308038430.jpg)
+![image](./5bad5a5308038430.jpg)
 
 *图 11-2 第一次优化后的点列图：RMS 半径仍在数百 μm 量级（三个视场分别约 933 / 1864 / 3781 μm），离目标还差得远*
 
@@ -183,11 +183,11 @@ summary: "文章 · 2026-10-03 · 这是”Zemax 入门”系列的下篇：用�
 
 **第二次优化**：设完口径后再次点开始。优化完成后可以发现：RMS 半径相比第一次有改善，但仍然在数百 μm 量级——**离最终目标还差两个数量级**，说明后面还需要继续多轮迭代。
 
-![image](./4ee5ce2e8fd267ca.jpg)![image](./4ee5ce2e8fd267ca.jpg)
+![image](./4ee5ce2e8fd267ca.jpg)
 
 *图 11-3 第二次优化后的镜头参数（口径已统一为 Maximum 解）*
 
-![image](./fe8a34e31ce924e6.jpg)![image](./fe8a34e31ce924e6.jpg)
+![image](./fe8a34e31ce924e6.jpg)
 
 *图 11-4 第二次优化后的点列图：有所改善（三个视场分别约 748 / 1760 / 3306 μm），但仍在数百 μm 量级*
 
@@ -204,11 +204,11 @@ summary: "文章 · 2026-10-03 · 这是”Zemax 入门”系列的下篇：用�
 
 最终结果：
 
-![image](./73ee2c277fc031e6.jpg)![image](./73ee2c277fc031e6.jpg)
+![image](./73ee2c277fc031e6.jpg)
 
 *图 11-5 最终优化后的 3D 布局图：三个组态纵向排开，像面位置基本对齐*
 
-![image](./1ce20cf8e19a5ec8.jpg)![image](./1ce20cf8e19a5ec8.jpg)
+![image](./1ce20cf8e19a5ec8.jpg)
 
 *图 11-6 最终镜头参数：状态栏实时显示当前组态的 EFFL、F 数、入瞳直径与总长*
 
@@ -220,15 +220,15 @@ summary: "文章 · 2026-10-03 · 这是”Zemax 入门”系列的下篇：用�
 
 三个焦段分别打开 **分析 → 点列图**：
 
-![image](./707efff2fae1efc7.jpg)![image](./707efff2fae1efc7.jpg)
+![image](./707efff2fae1efc7.jpg)
 
 *图 12-1 30 mm 焦段点列图*
 
-![image](./c8218ab7b7c1aab3.jpg)![image](./c8218ab7b7c1aab3.jpg)
+![image](./c8218ab7b7c1aab3.jpg)
 
 *图 12-2 60 mm 焦段点列图*
 
-![image](./7c680f06b944e42b.jpg)![image](./7c680f06b944e42b.jpg)
+![image](./7c680f06b944e42b.jpg)
 
 *图 12-3 90 mm 焦段点列图*
 
@@ -244,15 +244,15 @@ summary: "文章 · 2026-10-03 · 这是”Zemax 入门”系列的下篇：用�
 
 **分析 → MTF → FFT MTF**，三个焦段：
 
-![image](./b13fa9ecf868e66c.jpg)![image](./b13fa9ecf868e66c.jpg)
+![image](./b13fa9ecf868e66c.jpg)
 
 *图 12-4 30 mm 焦段 MTF*
 
-![image](./097acb9c5546ed88.jpg)![image](./097acb9c5546ed88.jpg)
+![image](./097acb9c5546ed88.jpg)
 
 *图 12-5 60 mm 焦段 MTF*
 
-![image](./0c13c4b9df3560a1.jpg)![image](./0c13c4b9df3560a1.jpg)
+![image](./0c13c4b9df3560a1.jpg)
 
 *图 12-6 90 mm 焦段 MTF*
 
@@ -267,15 +267,15 @@ summary: "文章 · 2026-10-03 · 这是”Zemax 入门”系列的下篇：用�
 
 **分析 → 场曲/畸变**，三个焦段：
 
-![image](./8a0e1f9d13660919.jpg)![image](./8a0e1f9d13660919.jpg)
+![image](./8a0e1f9d13660919.jpg)
 
 *图 12-7 30 mm 焦段场曲/畸变*
 
-![image](./252cd90e907d5d6a.jpg)![image](./252cd90e907d5d6a.jpg)
+![image](./252cd90e907d5d6a.jpg)
 
 *图 12-8 60 mm 焦段场曲/畸变*
 
-![image](./0ff6608fd72f969a.jpg)![image](./0ff6608fd72f969a.jpg)
+![image](./0ff6608fd72f969a.jpg)
 
 *图 12-9 90 mm 焦段场曲/畸变*
 
@@ -289,15 +289,15 @@ summary: "文章 · 2026-10-03 · 这是”Zemax 入门”系列的下篇：用�
 
 **分析 → 光线光扇图**，三个焦段：
 
-![image](./c468392f3417e1ad.jpg)![image](./c468392f3417e1ad.jpg)
+![image](./c468392f3417e1ad.jpg)
 
 *图 12-10 30 mm 焦段光线光扇图*
 
-![image](./bbc02d106ab24c26.jpg)![image](./bbc02d106ab24c26.jpg)
+![image](./bbc02d106ab24c26.jpg)
 
 *图 12-11 60 mm 焦段光线光扇图*
 
-![image](./39945afcf383d5c9.jpg)![image](./39945afcf383d5c9.jpg)
+![image](./39945afcf383d5c9.jpg)
 
 *图 12-12 90 mm 焦段光线光扇图*
 

@@ -14,11 +14,11 @@ summary: "回答 · 2026-07-06 · 一场天灾，一次地震，就死多少无�
 
 一场天灾，一次地震，就死多少无辜的人，你恨过天吗？恨过地吗？
 
-![image](./de89094d9654abe2.jpg)![image](./de89094d9654abe2.jpg)
+![image](./de89094d9654abe2.jpg)
 
 水位已经快到3楼了
 
-![image](./6d8f7cd483bdae70.jpg)![image](./6d8f7cd483bdae70.jpg)
+![image](./6d8f7cd483bdae70.jpg)
 
 基站泡水，全镇停电，水坝崩塌
 
@@ -28,13 +28,13 @@ summary: "回答 · 2026-07-06 · 一场天灾，一次地震，就死多少无�
 
 开不进去的救援飞机和汽车，还有打不通的电话
 
-![image](./d5fa824f92949e33.jpg)![image](./d5fa824f92949e33.jpg) [![image](./de27e96b749bb470.jpg)   https://www.zhihu.com/video/2057522442646578605](https://www.zhihu.com/video/2057522442646578605) ![image](./73fa961f7328f35d.jpg)![image](./73fa961f7328f35d.jpg)![image](./7b5efc9f277ec520.jpg)![image](./7b5efc9f277ec520.jpg)
+![image](./d5fa824f92949e33.jpg) [![image](./de27e96b749bb470.jpg)   https://www.zhihu.com/video/2057522442646578605](https://www.zhihu.com/video/2057522442646578605) ![image](./73fa961f7328f35d.jpg)![image](./7b5efc9f277ec520.jpg)
 
 暴虐的母亲河，正在蚕食着它的子民
 
 我在上海，像个傻逼一样的无力
 
-![image](./fd9386ac3d8b7492.jpg)![image](./fd9386ac3d8b7492.jpg) [![image](./6a8f57d177d1f9f6.jpg)   https://www.zhihu.com/video/2057522603703669027](https://www.zhihu.com/video/2057522603703669027)  [![image](./3c7f8d7e7ced2fc6.jpg)   https://www.zhihu.com/video/2057522702336972549](https://www.zhihu.com/video/2057522702336972549) 
+![image](./fd9386ac3d8b7492.jpg) [![image](./6a8f57d177d1f9f6.jpg)   https://www.zhihu.com/video/2057522603703669027](https://www.zhihu.com/video/2057522603703669027)  [![image](./3c7f8d7e7ced2fc6.jpg)   https://www.zhihu.com/video/2057522702336972549](https://www.zhihu.com/video/2057522702336972549)
 
 “洪水泛滥之时，耶和华坐着为王；耶和华坐着为王，直到永远。”
 

@@ -9,7 +9,6 @@ deleted: false
 archived_at: 2026-10-22
 tags: []
 summary: "文章 · 2026-04-17"
-math: true
 ---
 
 ## [什么是Personaplex?](https://github.com/NVIDIA/personaplex)
@@ -67,7 +66,7 @@ Personaplex需要opus，你可以上[官网](https://opus-codec.org/downloads/)�
 vcpkg是C++的一个包管理工具，所以下载它之前，我们需要先配置一下C++的环境([vs下载官网](https://visualstudio.microsoft.com/zh-hans/downloads/))  
 所有文件，我推荐下载到D盘一个你找得到位置的地方,因为后续我们要添加到环境变量。善用`cd`
 
-![image](./7c9c49c3a1757543.jpg)![image](./7c9c49c3a1757543.jpg)
+![image](./7c9c49c3a1757543.jpg)
 
 ```
 git clone https://github.com/microsoft/vcpkg
@@ -136,7 +135,7 @@ hf auth login
 #现在输入你的密钥吧。是看不见的哦，不要怀疑有问题
 ```
 
-![image](./8d18103e9efe4002.jpg)![image](./8d18103e9efe4002.jpg)
+![image](./8d18103e9efe4002.jpg)
 
 ```
 #生成一个临时的SSL密钥
@@ -154,11 +153,11 @@ New-Item -ItemType Directory -Path $SSL_DIR -Force
 python -m moshi.server --ssl "$SSL_DIR" --cpu-offload
 ```
 
-![image](./d016ec7dd841d200.jpg)![image](./d016ec7dd841d200.jpg)
+![image](./d016ec7dd841d200.jpg)
 
 打错字了。。。复制链接
 
-![image](./123cff74971f14ea.jpg)![image](./123cff74971f14ea.jpg)![image](./bc0963704930f0a6.jpg)![image](./bc0963704930f0a6.jpg)
+![image](./123cff74971f14ea.jpg)![image](./bc0963704930f0a6.jpg)
 
 离线本地运行的话也是可以哦
 
@@ -171,13 +170,13 @@ python -m moshi.offline \
   --output-text "output.json"
 ```
 
-![image](./1819799188a9ff69.jpg)![image](./1819799188a9ff69.jpg)
+![image](./1819799188a9ff69.jpg)
 
 大约等待七八分钟左右会在Personaplex模型的文件夹下边生成一个output.wav文件
 
 后记： 为什么我当时说8GB显存不合适呢？因为官方人员他们技术上就不支持
 
-![image](./e1bdfde630ca33f8.jpg)![image](./e1bdfde630ca33f8.jpg)
+![image](./e1bdfde630ca33f8.jpg)
 > 8GB显存将无法支持实时服务器运行。通过offline.py进行离线推理仍可通过cpu\_offload或纯CPU推理实现。保留此议题开放状态，以便社区成员尝试int4或nvfp4量化方案，或探索其他创新方法。官方目前正在研究仅对权重进行fp8量化的方案，该方案将支持16GB显存配置，但无法适配8GB显存。
 
 ---

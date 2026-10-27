@@ -80,6 +80,25 @@ def test_math_front_matter_when_body_has_math():
     assert "math: true" in page
 
 
+def test_math_flag_ignores_dollar_in_code():
+    page = render_page(
+        ITEM,
+        "命令 `$env:PATH`\n\n```powershell\n$HOME\n```",
+        deleted=False,
+        archived_at=date(2026, 10, 22),
+    )
+    assert "math: true" not in page
+
+
+def test_adjacent_duplicate_images_collapsed():
+    html = (
+        '<p><img src="https://pic1.zhimg.com/a.jpg">'
+        '<img src="https://pic1.zhimg.com/a.jpg"></p>'
+    )
+    md = html_to_markdown(html)
+    assert md.count("a.jpg") == 1
+
+
 def test_article_excerpt_strips_html_and_unescapes_entities():
     raw = {
         "id": 1,

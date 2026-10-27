@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import date, timedelta, timezone
 from typing import Mapping
 from urllib.parse import unquote, urljoin
@@ -13,6 +14,29 @@ from markdownify import markdownify
 from .models import ContentItem
 
 SHANGHAI = timezone(timedelta(hours=8))
+
+_FENCED_CODE = re.compile(r"```.*?```", re.S)
+_INLINE_CODE = re.compile(r"`[^`\n]*`")
+_MATH_PATTERNS = (
+    re.compile(r"\$\$[^$]+\$\$", re.S),
+    re.compile(r"(?<!\$)\$(?!\$)[^$\n]+\$(?!\$)"),
+    re.compile(r"\\\(.+?\\\)", re.S),
+    re.compile(r"\\\[.+?\\\]", re.S),
+)
+_ADJACENT_DUPLICATE_IMAGE = re.compile(
+    r"(!\[[^\]]*\]\(([^)\s]+)\))(?:[ \t]*!\[[^\]]*\]\(\2\))+"
+)
+
+
+def has_math_markup(body: str) -> bool:
+    """只把真正的数学定界符当作公式，避免代码里的 $ 触发 KaTeX。"""
+    text = _INLINE_CODE.sub("", _FENCED_CODE.sub("", body or ""))
+    return any(pattern.search(text) for pattern in _MATH_PATTERNS)
+
+
+def dedupe_adjacent_images(text: str) -> str:
+    """折叠懒加载/兼容层产生的相邻重复图片。"""
+    return _ADJACENT_DUPLICATE_IMAGE.sub(r"\1", text)
 
 
 def _string(value: str) -> str:
@@ -68,9 +92,10 @@ def html_to_markdown(
     html: str, image_map: Mapping[str, str] | None = None
 ) -> str:
     soup = _preprocess(html, image_map)
-    return markdownify(
+    rendered = markdownify(
         str(soup), heading_style="ATX", strip=["script", "style"]
     ).strip()
+    return dedupe_adjacent_images(rendered)
 
 
 def build_front_matter(
@@ -113,7 +138,7 @@ def build_front_matter(
 def render_page(
     item: ContentItem, body: str, deleted: bool, archived_at: date
 ) -> str:
-    has_math = "$" in body
+    has_math = has_math_markup(body)
     front = build_front_matter(item, deleted, archived_at, has_math=has_math)
     parts = [front, ""]
     if deleted:

@@ -10,8 +10,10 @@ from datetime import date, datetime
 from pathlib import Path
 
 from .client import AuthError, RateLimitError
+from .crossposts import load_crossposts
 from .images import ImageLocalizer
 from .models import ContentItem
+from .normalize import normalize_content
 from .render import html_to_markdown, render_page
 from .state import SyncState
 from .stats import build_stats, load_stats, write_stats
@@ -202,5 +204,10 @@ def run_sync(
                 fresh=fresh,
             )
             write_stats(stats_path, stats_data)
+        crossposts_file = config.get("crossposts_file")
+        mapping = load_crossposts(Path(crossposts_file)) if crossposts_file else {}
+        changed = normalize_content(content_root, mapping)
+        if changed:
+            _log(state_dir, f"normalized content pages={changed}")
         state.touch()
     return report

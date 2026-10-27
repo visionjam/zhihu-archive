@@ -4,6 +4,8 @@ date: 2026-10-24
 lastmod: 2026-10-24
 type: articles
 zhihu_id: "2097400787584422419"
+canonicalURL: "https://visionjam.github.io/android-guide/05-recommendations/"
+ShowCanonicalLink: true
 zhihu_url: "https://zhuanlan.zhihu.com/p/2097400787584422419"
 deleted: false
 archived_at: 2026-10-24
