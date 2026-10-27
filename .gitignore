@@ -1,6 +1,8 @@
 .local/
 public/
 resources/_gen/
+# 测试会临时创建 content/<kind>/_xxx/，不能被同步提交
+content/*/_*/
 .hugo_build.lock
 .pytest_cache/
 __pycache__/
