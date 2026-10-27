@@ -1,8 +1,10 @@
 {{- $page := . -}}
 {{- $showDates := false -}}
+{{- $showCounts := false -}}
 {{- if reflect.IsMap . -}}
     {{- $page = .page -}}
     {{- $showDates = .showDates | default false -}}
+    {{- $showCounts = .showCounts | default false -}}
 {{- end -}}
 
 {{- $meta := slice }}
@@ -24,12 +26,15 @@
     {{- end -}}
 {{- end -}}
 
-{{- if ($page.Param "ShowReadingTime") -}}
-    {{- $meta = $meta | append (printf "<span>%s</span>" (i18n "read_time" $page.ReadingTime | default (printf "%d min" $page.ReadingTime))) -}}
-{{- end -}}
-
-{{- if ($page.Param "ShowWordCount") -}}
-    {{- $meta = $meta | append (printf "<span>%s</span>" (i18n "words" $page.WordCount | default (printf "%d words" $page.WordCount))) -}}
+{{- if and $showCounts $page.Params.zhihu_id -}}
+    {{- $stats := site.Data.zhihu_stats | default dict -}}
+    {{- $entries := $stats.items | default dict -}}
+    {{- $key := printf "%s:%s" $page.Type $page.Params.zhihu_id -}}
+    {{- with index $entries $key -}}
+        {{- if gt (int .word_count) 0 -}}
+            {{- $meta = $meta | append (printf "<span>%s 字 · 约 %d 分钟</span>" (lang.FormatNumber 0 .word_count) (int .reading_minutes)) }}
+        {{- end -}}
+    {{- end -}}
 {{- end -}}
 
 {{- if not ($page.Param "hideAuthor") -}}

@@ -284,6 +284,35 @@ def test_single_page_shows_votes_words_and_reading_time(
     assert "gc.zgo.at" not in page
 
 
+def test_home_list_shows_words_and_reading_time(tmp_path, temp_bundles, temp_stats):
+    temp_bundles("answers", "_list_stats", "TABTEST-LIST-STATS", zhihu_id="list_stats")
+    temp_stats(
+        {
+            "generated_at": "2026-01-01T00:00:00+00:00",
+            "totals": {
+                "items": 1,
+                "words": 9999,
+                "votes": 0,
+                "comments": 0,
+                "by_kind": {"answers": 1, "articles": 0, "pins": 0},
+            },
+            "items": {
+                "answers:list_stats": stats_entry(
+                    "answers", "list_stats", "TABTEST-LIST-STATS", 0, 1234, 4
+                )
+            },
+        }
+    )
+    public = build_site(tmp_path)
+    home = read_page(public)
+
+    assert "1,234 字 · 约 4 分钟" in home
+    assert "9,999 字" in home
+
+    single = read_page(public, "answers", "_list_stats")
+    assert single.count("1,234") == 1
+
+
 def test_single_page_shows_publish_and_edit_dates(tmp_path, temp_bundles):
     temp_bundles(
         "answers",
