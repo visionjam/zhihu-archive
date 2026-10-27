@@ -1,0 +1,24 @@
+{{- $entry := .entry -}}
+{{- $currentPage := .currentPage -}}
+{{- $menu_item_url := (cond (strings.HasSuffix $entry.URL "/") $entry.URL (printf "%s/" $entry.URL)) | absLangURL -}}
+{{- $page_url := $currentPage.Permalink | absLangURL -}}
+{{- $is_search := false -}}
+{{- with site.GetPage $entry.KeyName -}}
+    {{- $is_search = eq .Layout "search" -}}
+{{- end -}}
+<a href="{{ $entry.URL | absLangURL }}" title="{{ $entry.Title | default $entry.Name }} {{- cond $is_search (" (Alt + /)" | safeHTMLAttr) ("" | safeHTMLAttr ) }}"
+{{- cond $is_search (" accesskey=/" | safeHTMLAttr) ("" | safeHTMLAttr ) }}>
+    <span {{- if eq $menu_item_url $page_url }} class="active" {{- end }}>
+        {{- $entry.Pre }}
+        {{- $entry.Name -}}
+        {{ $entry.Post -}}
+    </span>
+    {{- if (findRE "://" $entry.URL) }}&nbsp;
+    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+        <path d="M15 3h6v6"></path>
+        <path d="M10 14L21 3"></path>
+    </svg>
+    {{- end }}
+</a>

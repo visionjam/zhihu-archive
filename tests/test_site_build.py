@@ -528,3 +528,30 @@ def test_stats_page_and_entry_links(tmp_path):
     assert 'href="/zhihu-archive/ranking/"' in home
     assert 'href="/zhihu-archive/stats/"' in ranking
     assert 'href="/zhihu-archive/ranking/"' in stats
+
+
+def test_header_more_menu_groups_secondary_links(tmp_path):
+    public = build_site(tmp_path)
+    home = read_page(public)
+    about = read_page(public, "about")
+
+    more = re.search(r'<details class="menu-more-panel">.*?</details>', home, re.S)
+    assert more
+    panel = more.group(0)
+    for path in (
+        "zhihu-archive/ranking/",
+        "zhihu-archive/stats/",
+        "zhihu-archive/about/",
+        "https://visionjam.github.io/",
+    ):
+        assert re.search(rf'href="[^"]*{re.escape(path)}"', panel)
+
+    primary = home[
+        home.index('<ul id="menu" class="menu">') : home.index(
+            '<li class="menu-more">'
+        )
+    ]
+    for path in ("ranking/", "stats/", "about/"):
+        assert path not in primary
+
+    assert 'class="menu-more-toggle active"' in about

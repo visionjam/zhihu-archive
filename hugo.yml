@@ -27,6 +27,18 @@ menu:
       name: 归档
       url: /archives/
       weight: 20
+    - identifier: ranking
+      name: 排行
+      url: /ranking/
+      weight: 25
+      params:
+        group: more
+    - identifier: stats
+      name: 统计
+      url: /stats/
+      weight: 27
+      params:
+        group: more
     - identifier: search
       name: 搜索
       url: /search/
@@ -35,10 +47,14 @@ menu:
       name: 博客
       url: "https://visionjam.github.io/"
       weight: 40
+      params:
+        group: more
     - identifier: about
       name: 关于
       url: /about/
       weight: 50
+      params:
+        group: more
 
 params:
   env: production
