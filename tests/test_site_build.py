@@ -720,6 +720,18 @@ def test_stats_all_view_dedupes_and_keeps_engagement(tmp_path, temp_output_stats
     assert "ZHIHU-C" in zhihu_panel
 
 
+def test_stats_zhihu_site_likes_uses_archived_path(
+    tmp_path, temp_output_stats, temp_likes
+):
+    temp_output_stats(STATS_FIXTURE)
+    temp_likes({"items": {"/zhihu-archive/answers/z1/": {"likes": 6}}})
+    public = build_site(tmp_path)
+    html = read_page(public, "stats")
+
+    zhihu_panel = re.search(r'data-stats-panel="zhihu"(.*)', html, re.S).group(1)
+    assert "<dt>站内赞</dt><dd>6</dd>" in zhihu_panel
+
+
 def test_stats_page_survives_missing_snapshot(tmp_path, temp_output_stats):
     temp_output_stats(None)
     public = build_site(tmp_path)

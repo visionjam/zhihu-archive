@@ -40,7 +40,8 @@
   {{- $comments = add $comments (.comments | default 0) -}}
   {{- $itemLikes := .site_likes | default 0 -}}
   {{- if eq .source $siteSource -}}
-    {{- with index $likeItems .rel_path -}}
+    {{- $likePath := strings.TrimPrefix "/" (.rel_path | default "") | relURL -}}
+    {{- with index $likeItems $likePath -}}
       {{- $itemLikes = .likes | default 0 -}}
     {{- end -}}
   {{- end -}}

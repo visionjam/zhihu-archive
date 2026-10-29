@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+import pytest
+
 import refresh_output_stats
 import sync
 
@@ -70,7 +72,10 @@ def make_archive(root: Path, *, blog_item: dict | None = None) -> None:
             }
         },
     )
-    write_json(data / "likes.json", {"items": {"/answers/z1/": {"likes": 4}}})
+    write_json(
+        data / "likes.json",
+        {"items": {"/zhihu-archive/answers/z1/": {"likes": 4}}},
+    )
     for slug, lastmod in (("z1", "2026-01-05"), ("z2", None)):
         bundle = root / "content" / "answers" / slug
         bundle.mkdir(parents=True)
@@ -213,3 +218,23 @@ def test_archive_workflow_refreshes_zhihu_side():
     text = (ROOT / ".github/workflows/pages.yml").read_text("utf-8")
 
     assert "tools/refresh_output_stats.py --write" in text
+
+
+def test_missing_zhihu_stats_raises(tmp_path):
+    make_archive(tmp_path)
+    (tmp_path / "data" / "zhihu_stats.json").unlink()
+
+    with pytest.raises(FileNotFoundError):
+        refresh_output_stats.refresh(tmp_path)
+
+
+def test_refresh_refuses_empty_zhihu_replacement(tmp_path):
+    make_archive(tmp_path)
+    refresh_output_stats.refresh(tmp_path)
+    write_json(
+        tmp_path / "data" / "zhihu_stats.json",
+        {"version": 1, "items": {}},
+    )
+
+    with pytest.raises(RuntimeError):
+        refresh_output_stats.refresh(tmp_path)

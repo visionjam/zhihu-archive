@@ -8,6 +8,7 @@ import json
 import re
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import urlparse
 
 from zhihu_archive.stats import parse_front_matter
 
@@ -25,6 +26,18 @@ def _load_json(path: Path) -> dict:
 
 def load_document(path: Path) -> dict:
     return _load_json(Path(path))
+
+
+def _load_required_json(path: Path) -> dict:
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError(f"{path} 不是 JSON 对象")
+    return data
+
+
+def _public_path(base_url: str, rel_path: str) -> str:
+    prefix = urlparse(base_url).path.rstrip("/") if base_url else ""
+    return prefix + rel_path
 
 
 def _base_url(root: Path) -> str:
@@ -89,7 +102,9 @@ def _blog_urls(items: list[dict]) -> set[str]:
 
 def build_zhihu_items(root: Path, blog_urls: set[str]) -> list[dict]:
     root = Path(root).resolve()
-    raw_items = _load_json(root / "data" / "zhihu_stats.json").get("items") or {}
+    raw_items = _load_required_json(root / "data" / "zhihu_stats.json").get(
+        "items"
+    ) or {}
     if isinstance(raw_items, dict):
         entries = list(raw_items.values())
     elif isinstance(raw_items, list):
@@ -129,7 +144,7 @@ def build_zhihu_items(root: Path, blog_urls: set[str]) -> list[dict]:
                 "minutes": _int(entry.get("reading_minutes")),
                 "votes": _int(entry.get("voteup_count")),
                 "comments": _int(entry.get("comment_count")),
-                "site_likes": _like_count(likes, rel_path),
+                "site_likes": _like_count(likes, _public_path(base_url, rel_path)),
                 "duplicate": bool(
                     mapped_url and mapped_url in normalized_blog_urls
                 ),
@@ -162,7 +177,14 @@ def refresh(root: Path, now: str | None = None) -> dict[str, int]:
         for item in existing
         if isinstance(item, dict) and item.get("source") == "blog"
     ]
+    existing_zhihu = [
+        item
+        for item in existing
+        if isinstance(item, dict) and item.get("source") == "zhihu"
+    ]
     zhihu = build_zhihu_items(root, _blog_urls(blog))
+    if not zhihu and existing_zhihu:
+        raise RuntimeError("知乎统计为空，拒绝覆盖现有快照")
     _write_document(path, _sort_items(blog + zhihu), now)
     return {"zhihu": len(zhihu)}
 
@@ -240,10 +262,18 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     root = Path(args.root).resolve()
     if args.write:
-        counts = refresh(root)
+        try:
+            counts = refresh(root)
+        except (OSError, ValueError, RuntimeError) as exc:
+            print(f"错误：{exc}")
+            return 2
         print(f"知乎 {counts['zhihu']} 条 -> {root / 'data' / 'output_stats.json'}")
         return 0
-    issues = check(root)
+    try:
+        issues = check(root)
+    except (OSError, ValueError) as exc:
+        print(f"错误：{exc}")
+        return 2
     for issue in issues:
         print(f"问题：{issue}")
     return 1 if issues else 0
