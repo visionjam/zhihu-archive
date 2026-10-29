@@ -1,7 +1,7 @@
 ---
 title: "统计"
 layout: "stats"
-summary: "归档内容的发布节奏与更新统计"
+summary: "知乎归档与博客的发布节奏、跨站统计与更新"
 outputs: ["HTML"]
 ---
 
