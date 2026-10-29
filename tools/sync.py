@@ -5,12 +5,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from datetime import date
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import refresh_output_stats
 
 from zhihu_archive.client import AuthError, RateLimitError, ZhihuClient
 from zhihu_archive.cookie import CookieFormatError, load_cookie
@@ -22,6 +25,68 @@ from zhihu_archive.stats import build_stats, load_stats, write_stats
 from zhihu_archive.sync import KINDS, SyncReport, run_sync
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def find_blog_root(
+    root: Path = ROOT,
+    env: dict | None = None,
+    config: dict | None = None,
+) -> Path | None:
+    env = os.environ if env is None else env
+    value = env.get("BLOG_ROOT")
+    if value:
+        candidate = Path(value)
+    elif config and config.get("blog_root"):
+        candidate = Path(str(config["blog_root"]))
+        if not candidate.is_absolute():
+            candidate = Path(root) / candidate
+    else:
+        candidate = Path(root).parent / "my blog"
+    candidate = candidate.resolve()
+    tool = candidate / "tools" / "output_stats.py"
+    return candidate if tool.is_file() else None
+
+
+def refresh_stats_snapshots(
+    root: Path = ROOT, config: dict | None = None
+) -> None:
+    try:
+        counts = refresh_output_stats.refresh(root)
+        print(f"统计快照：归档 {counts['zhihu']} 条。")
+    except Exception as exc:  # noqa: BLE001 - 统计失败不应阻断同步
+        print(f"警告：归档统计快照生成失败：{exc}")
+        return
+    blog = find_blog_root(root, config=config)
+    if blog is None:
+        return
+    tool = blog / "tools" / "output_stats.py"
+    try:
+        proc = subprocess.run(
+            [
+                sys.executable,
+                str(tool),
+                "--side",
+                "zhihu",
+                "--blog-root",
+                str(blog),
+                "--archive-root",
+                str(root),
+            ],
+            cwd=str(blog),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=60,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        print(f"警告：博客仓库统计快照更新失败：{exc}")
+        return
+    if proc.returncode != 0:
+        detail = (proc.stderr or proc.stdout).strip()
+        print(f"警告：博客仓库统计快照更新失败：{detail}")
+        return
+    print("统计快照：博客仓库副本已更新。")
 
 
 def run_git(root: Path, *args: str) -> None:
@@ -182,6 +247,7 @@ def main(argv: list[str] | None = None) -> int:
             previous=load_stats(stats_path),
         )
         write_stats(stats_path, data)
+        refresh_stats_snapshots(ROOT, config)
         print(f"统计已重建：{data['totals']['items']} 条 -> {stats_path}")
         return 0
 
@@ -250,6 +316,7 @@ def main(argv: list[str] | None = None) -> int:
                 file=sys.stderr,
             )
             return 4
+        refresh_stats_snapshots(ROOT, config)
         try:
             published = publish_if_clean(
                 ROOT,

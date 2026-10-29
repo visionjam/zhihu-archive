@@ -2,6 +2,9 @@ import json
 from pathlib import Path
 
 import refresh_output_stats
+import sync
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def write_json(path: Path, data) -> None:
@@ -165,3 +168,48 @@ def test_missing_output_file_creates_empty_blog_side(tmp_path):
 
     assert counts["zhihu"] == 2
     assert all(item["source"] == "zhihu" for item in items.values())
+
+
+def test_find_blog_root_defaults_to_sibling(tmp_path):
+    blog = tmp_path / "my blog"
+    (blog / "tools").mkdir(parents=True)
+    (blog / "tools/output_stats.py").write_text("", encoding="utf-8")
+    archive = tmp_path / "zhihu-archive"
+    archive.mkdir()
+
+    assert sync.find_blog_root(archive, {}) == blog
+
+
+def test_find_blog_root_respects_env(tmp_path):
+    blog = tmp_path / "custom-blog"
+    (blog / "tools").mkdir(parents=True)
+    (blog / "tools/output_stats.py").write_text("", encoding="utf-8")
+    archive = tmp_path / "zhihu-archive"
+    archive.mkdir()
+
+    assert sync.find_blog_root(archive, {"BLOG_ROOT": str(blog)}) == blog
+
+
+def test_find_blog_root_uses_config_key(tmp_path):
+    blog = tmp_path / "from-config"
+    (blog / "tools").mkdir(parents=True)
+    (blog / "tools/output_stats.py").write_text("", encoding="utf-8")
+    archive = tmp_path / "zhihu-archive"
+    archive.mkdir()
+
+    assert sync.find_blog_root(
+        archive, {}, {"blog_root": "../from-config"}
+    ) == blog
+
+
+def test_find_blog_root_returns_none_without_tool(tmp_path):
+    archive = tmp_path / "zhihu-archive"
+    archive.mkdir()
+
+    assert sync.find_blog_root(archive, {}) is None
+
+
+def test_archive_workflow_refreshes_zhihu_side():
+    text = (ROOT / ".github/workflows/pages.yml").read_text("utf-8")
+
+    assert "tools/refresh_output_stats.py --write" in text

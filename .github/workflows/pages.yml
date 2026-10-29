@@ -44,6 +44,9 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
+      - name: Refresh output stats (zhihu side)
+        run: python3 tools/refresh_output_stats.py --write
+
       - name: Run tests
         run: python -m pytest -q
 
