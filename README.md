@@ -38,10 +38,12 @@ VisionJam 的知乎回答、想法与文章归档站。归档站与博客平行�
 - `layouts/_partials/type_tabs.html`：首页与各列表页顶部的分类标签。
 - `layouts/_partials/home_pinned.html` + `data/pinned.yml`：主页置顶区。
 - `content/ranking/_index.md` + `layouts/ranking.html`：`/ranking/` 排行 section，从 `data/zhihu_stats.json` 读取并排序；支持 全部/回答/文章/想法 筛选（`?type=answers` 等）。
-- `content/stats/_index.md` + `layouts/stats.html`：`/stats/` 统计页，按知乎原始发布时间统计发文频率、更新热力图、写作节奏和最近更新；数据来自 `data/zhihu_stats.json` 与页面 `lastmod`；入口在顶部「更多」、首页与排行页统计条，页内提供「查看排行」反向入口。
+- `content/stats/_index.md` + `layouts/stats.html` + `layouts/_partials/stats_view.html`：`/stats/` 统计页，提供「全部 / 博客 / 知乎」三个视图，归档站默认「知乎」；「全部」合并两站输出并去掉跨站重复。数据来自 `data/output_stats.json`；入口在顶部「更多」、首页与排行页统计条，页内提供「查看排行」反向入口。
 - `layouts/_partials/site_stats.html`：主页全站统计条，读取 `data/zhihu_stats.json` 与 `data/likes.json`，并链接到 `/stats/` 与 `/ranking/`。
 - `layouts/_partials/header.html`：顶部导航覆盖，把 `params.group: more` 的菜单项收进「更多」折叠面板；`layouts/_partials/menu_link.html` 复用菜单链接渲染。
 - `data/zhihu_stats.json`：同步生成的统计文件（赞、评论、字数、阅读时长）；`python tools/sync.py --refresh-stats` 可在不联网时从本地正文与缓存重建。
+- `data/output_stats.json`：跨站统计快照（同时含博客与知乎条目），由 `tools/refresh_output_stats.py` 从本地 `zhihu_stats.json` 重建知乎侧；博客侧由博客仓库的 `tools/output_stats.py` 写入。
+- `tools/refresh_output_stats.py`：`--write` 写回快照，`--check` 校验知乎侧；`python tools/sync.py` 和归档 CI 会自动运行。同步时若同级存在 `../my blog`（或设置环境变量 `BLOG_ROOT` / `config.json` 的 `blog_root`），还会更新博客仓库中的副本。
 - `data/crossposts.json`：知乎文章 ID → 博客 URL / 博客标题的映射，由博客仓库 `tools/crossposts.py` 自动生成；`python tools/sync.py --normalize` 会把 `canonicalURL` 与 `ShowCanonicalLink` 写入已有页面，并在同步结束时自动维护。
 - `layouts/rss.xml`：RSS 覆盖模板，只收录回答/文章/想法并补 `lastBuildDate`；条数由 `services.rss.limit`（当前 50）控制。
 - `layouts/single.html` + `layouts/_partials/zhihu_stats.html`：单篇标题下的统计行（含站内赞）。
