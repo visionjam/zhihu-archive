@@ -1,0 +1,359 @@
+{{- $items := .items | default slice -}}
+{{- $engagement := .engagementItems | default $items -}}
+{{- $view := .view -}}
+{{- $siteSource := .siteSource -}}
+{{- $likeItems := .likeItems -}}
+{{- $hasZhihu := .hasZhihu -}}
+
+{{- $chars := 0 -}}
+{{- $minutes := 0 -}}
+{{- $likes := 0 -}}
+{{- $votes := 0 -}}
+{{- $comments := 0 -}}
+{{- $monthCount := newScratch -}}
+{{- $yearCount := newScratch -}}
+{{- $yearWords := newScratch -}}
+{{- $wdCount := newScratch -}}
+{{- $heat := newScratch -}}
+
+{{- range $items -}}
+  {{- $chars = add $chars (.words | default 0) -}}
+  {{- $minutes = add $minutes (.minutes | default 0) -}}
+  {{- $d := .date | default "" -}}
+  {{- if $d -}}
+    {{- $mk := substr $d 0 7 -}}
+    {{- $yk := substr $d 0 4 -}}
+    {{- $monthCount.SetInMap "c" $mk (add (index ($monthCount.Get "c" | default dict) $mk | default 0) 1) -}}
+    {{- $yearCount.SetInMap "c" $yk (add (index ($yearCount.Get "c" | default dict) $yk | default 0) 1) -}}
+    {{- $yearWords.SetInMap "c" $yk (add (index ($yearWords.Get "c" | default dict) $yk | default 0) (.words | default 0)) -}}
+    {{- $wdCount.SetInMap "c" (printf "%d" (int (time.AsTime $d).Weekday)) (add (index ($wdCount.Get "c" | default dict) (printf "%d" (int (time.AsTime $d).Weekday)) | default 0) 1) -}}
+    {{- $heat.SetInMap "d" $d (add (index ($heat.Get "d" | default dict) $d | default 0) 1) -}}
+  {{- end -}}
+  {{- $lk := .lastmod | default $d -}}
+  {{- if and $lk $d (ne $lk $d) -}}
+    {{- $heat.SetInMap "d" $lk (add (index ($heat.Get "d" | default dict) $lk | default 0) 1) -}}
+  {{- end -}}
+{{- end -}}
+
+{{- range $engagement -}}
+  {{- $votes = add $votes (.votes | default 0) -}}
+  {{- $comments = add $comments (.comments | default 0) -}}
+  {{- $itemLikes := .site_likes | default 0 -}}
+  {{- if eq .source $siteSource -}}
+    {{- with index $likeItems .rel_path -}}
+      {{- $itemLikes = .likes | default 0 -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $likes = add $likes $itemLikes -}}
+{{- end -}}
+
+{{- $dates := slice -}}
+{{- range $items -}}
+  {{- $d := .date | default "" -}}
+  {{- if and $d (not (in $dates $d)) -}}
+    {{- $dates = $dates | append $d -}}
+  {{- end -}}
+{{- end -}}
+{{- $dates = sort $dates -}}
+
+{{- $months := slice -}}
+{{- range $dates -}}
+  {{- $m := substr . 0 7 -}}
+  {{- if not (in $months $m) -}}
+    {{- $months = $months | append $m -}}
+  {{- end -}}
+{{- end -}}
+{{- $months = sort $months -}}
+
+{{- $first := "" -}}
+{{- $last := "" -}}
+{{- if $dates -}}
+  {{- $first = index $dates 0 -}}
+  {{- $last = index $dates (sub (len $dates) 1) -}}
+{{- end -}}
+
+{{- $avg := 0.0 -}}
+{{- if $months -}}
+  {{- $avg = div (float (len $items)) (float (len $months)) -}}
+{{- end -}}
+
+{{- $maxGap := 0 -}}
+{{- $gapFrom := "" -}}
+{{- $gapTo := "" -}}
+{{- $prev := "" -}}
+{{- range $dates -}}
+  {{- if $prev -}}
+    {{- $prevT := time.AsTime $prev -}}
+    {{- $curT := time.AsTime . -}}
+    {{- $days := div (sub $curT.Unix $prevT.Unix) 86400 -}}
+    {{- if gt $days $maxGap -}}
+      {{- $maxGap = $days -}}
+      {{- $gapFrom = $prev -}}
+      {{- $gapTo = . -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $prev = . -}}
+{{- end -}}
+
+{{- $gapFromShort := $gapFrom -}}
+{{- $gapToShort := $gapTo -}}
+{{- if and $gapFrom $gapTo (eq (substr $gapFrom 0 4) (substr $gapTo 0 4)) -}}
+  {{- $gapToShort = substr $gapTo 5 5 -}}
+{{- end -}}
+
+{{- $streak := 0 -}}
+{{- $run := 0 -}}
+{{- $prevMonth := "" -}}
+{{- range $months -}}
+  {{- if eq $prevMonth "" -}}
+    {{- $run = 1 -}}
+  {{- else -}}
+    {{- $t := time.AsTime (printf "%s-01" $prevMonth) -}}
+    {{- $next := $t.AddDate 0 1 0 -}}
+    {{- if eq ($next.Format "2006-01") . -}}
+      {{- $run = add $run 1 -}}
+    {{- else -}}
+      {{- $run = 1 -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $prevMonth = . -}}
+  {{- $streak = $run -}}
+{{- end -}}
+
+{{- $monthMap := $monthCount.Get "c" | default dict -}}
+{{- $topMonth := "" -}}
+{{- $topMonthCount := 0 -}}
+{{- range $months -}}
+  {{- $c := index $monthMap . | default 0 -}}
+  {{- if gt $c $topMonthCount -}}
+    {{- $topMonthCount = $c -}}
+    {{- $topMonth = . -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $nowMonth := now.Format "2006-01" -}}
+{{- $nowT := time.AsTime (printf "%s-01" $nowMonth) -}}
+{{- $barStart := $nowT.AddDate 0 -11 0 -}}
+{{- if $months -}}
+  {{- $earliest := index $months 0 -}}
+  {{- $oldest := $nowT.AddDate 0 -23 0 -}}
+  {{- if lt $earliest ($oldest.Format "2006-01") -}}
+    {{- $barStart = $oldest -}}
+  {{- end -}}
+{{- end -}}
+{{- $barMonths := slice -}}
+{{- range $i := seq 0 23 -}}
+  {{- $t := $barStart.AddDate 0 $i 0 -}}
+  {{- $mk := $t.Format "2006-01" -}}
+  {{- if le $mk $nowMonth -}}
+    {{- $barMonths = $barMonths | append $mk -}}
+  {{- end -}}
+{{- end -}}
+{{- $maxBar := 0 -}}
+{{- range $barMonths -}}
+  {{- $c := index $monthMap . | default 0 -}}
+  {{- if gt $c $maxBar -}}
+    {{- $maxBar = $c -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $years := slice -}}
+{{- range $dates -}}
+  {{- $y := substr . 0 4 -}}
+  {{- if not (in $years $y) -}}
+    {{- $years = $years | append $y -}}
+  {{- end -}}
+{{- end -}}
+{{- $years = sort $years -}}
+{{- $yearMap := $yearCount.Get "c" | default dict -}}
+{{- $yearWordMap := $yearWords.Get "c" | default dict -}}
+
+{{- $wdMap := $wdCount.Get "c" | default dict -}}
+{{- $wdLabels := slice "日" "一" "二" "三" "四" "五" "六" -}}
+{{- $maxWd := 0 -}}
+{{- $topWd := "" -}}
+{{- range $i := slice 1 2 3 4 5 6 0 -}}
+  {{- $c := index $wdMap (printf "%d" $i) | default 0 -}}
+  {{- if gt $c $maxWd -}}
+    {{- $maxWd = $c -}}
+    {{- $topWd = printf "周%s" (index $wdLabels $i) -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $today := now -}}
+{{- $todayKey := $today.Format "2006-01-02" -}}
+{{- $start := $today.AddDate 0 0 -364 -}}
+{{- $start = $start.AddDate 0 0 (sub 0 (int $start.Weekday)) -}}
+{{- $heatMap := $heat.Get "d" | default dict -}}
+
+{{- $updates := slice -}}
+{{- range $items -}}
+  {{- $d := .date | default "" -}}
+  {{- $lk := .lastmod | default $d -}}
+  {{- if and $lk $d (ne $lk $d) -}}
+    {{- $updates = $updates | append (dict "title" .title "url" .url "lastmod" $lk "source" .source) -}}
+  {{- end -}}
+{{- end -}}
+{{- $updates = sort $updates "lastmod" "desc" -}}
+
+{{- $kindCount := newScratch -}}
+{{- range $engagement -}}
+  {{- $k := .kind | default "" -}}
+  {{- $kindCount.SetInMap "c" $k (add (index ($kindCount.Get "c" | default dict) $k | default 0) 1) -}}
+{{- end -}}
+{{- $kindMap := $kindCount.Get "c" | default dict -}}
+{{- $blogCount := len (where $engagement "source" "blog") -}}
+{{- $zhihuCount := len (where $engagement "source" "zhihu") -}}
+{{- $dupCount := 0 -}}
+{{- range $engagement -}}
+  {{- if .duplicate -}}
+    {{- $dupCount = add $dupCount 1 -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $breakdown := "" -}}
+{{- if eq $view "all" -}}
+  {{- $breakdown = printf "博客 %d 篇 · 知乎 %d 篇（回答 %d / 文章 %d / 想法 %d，其中 %d 篇与博客重复）；跨站重复 %d 篇已合并" $blogCount $zhihuCount (index $kindMap "answers" | default 0) (index $kindMap "articles" | default 0) (index $kindMap "pins" | default 0) $dupCount $dupCount -}}
+{{- else if eq $view "blog" -}}
+  {{- $breakdown = printf "文章 %d 篇 · Android 指南 %d 篇" (index $kindMap "posts" | default 0) (index $kindMap "android-guide" | default 0) -}}
+{{- else -}}
+  {{- $breakdown = printf "回答 %d 篇 · 文章 %d 篇 · 想法 %d 篇" (index $kindMap "answers" | default 0) (index $kindMap "articles" | default 0) (index $kindMap "pins" | default 0) -}}
+{{- end -}}
+
+<section class="stats-view" id="stats-panel-{{ $view }}" data-stats-panel="{{ $view }}" role="tabpanel" aria-labelledby="stats-tab-{{ $view }}"{{ if not .default }} hidden{{ end }}>
+  {{- if $items }}
+  <section class="stats-section">
+    <h2>概览</h2>
+    <dl class="stats-overview">
+      <div><dt>收录</dt><dd>{{ lang.FormatNumber 0 (len $items) }} 篇</dd></div>
+      <div><dt>总字数</dt><dd>{{ lang.FormatNumber 0 $chars }}</dd></div>
+      <div><dt>总时长</dt><dd>约 {{ lang.FormatNumber 0 $minutes }} 分钟</dd></div>
+      {{- if $hasZhihu }}
+      <div><dt>知乎赞</dt><dd>{{ lang.FormatNumber 0 $votes }}</dd></div>
+      <div><dt>评论</dt><dd>{{ lang.FormatNumber 0 $comments }}</dd></div>
+      {{- end }}
+      <div><dt>站内赞</dt><dd>{{ lang.FormatNumber 0 $likes }}</dd></div>
+      <div><dt>首次发布</dt><dd>{{ $first | default "—" }}</dd></div>
+      <div><dt>最近发布</dt><dd>{{ $last | default "—" }}</dd></div>
+      <div><dt>活跃天数</dt><dd>{{ len $dates }} 天</dd></div>
+      <div><dt>活跃月份</dt><dd>{{ len $months }} 个月</dd></div>
+    </dl>
+    <p class="stats-note">{{ $breakdown }}</p>
+  </section>
+
+  <section class="stats-section">
+    <h2>发文频率</h2>
+    <p class="stats-note">最近 {{ len $barMonths }} 个月的发布篇数{{ if eq $view "all" }}（按各平台原始发布时间）{{ else if eq $view "blog" }}（按博客发布时间）{{ else }}（按知乎原始发布时间）{{ end }}。</p>
+    <ol class="stats-bars">
+      {{- range $barMonths }}
+      {{- $c := index $monthMap . | default 0 }}
+      <li class="stats-bar-row">
+        <span class="stats-bar-label">{{ . }}</span>
+        <span class="stats-bar-track">{{- if gt $c 0 }}<span class="stats-bar-fill" style="width: {{ div (mul $c 100) $maxBar }}%"></span>{{- end }}</span>
+        <span class="stats-bar-num">{{ $c }}</span>
+      </li>
+      {{- end }}
+    </ol>
+  </section>
+
+  <section class="stats-section">
+    <h2>年度回顾</h2>
+    {{- if $years }}
+    <ul class="stats-list">
+      {{- $yLen := len $years }}
+      {{- range $i := seq 0 (sub $yLen 1) }}
+      {{- $y := index $years (sub (sub $yLen 1) $i) }}
+      <li>
+        <span class="stats-list-label">{{ $y }}</span>
+        <span class="stats-list-value">{{ lang.FormatNumber 0 (index $yearMap $y | default 0) }} 篇 · {{ lang.FormatNumber 0 (index $yearWordMap $y | default 0) }} 字</span>
+      </li>
+      {{- end }}
+    </ul>
+    {{- else }}
+    <p class="stats-note">暂无发布记录。</p>
+    {{- end }}
+  </section>
+
+  <section class="stats-section">
+    <h2>更新热力图</h2>
+    <p class="stats-note">最近 12 个月，每格代表一天；颜色越深，当天发布或最后编辑的篇数越多。</p>
+    <div class="stats-heat-wrap">
+      <div class="stats-heatmap" role="img" aria-label="最近 12 个月更新热力图">
+        {{- range $i := seq 0 370 }}
+        {{- $d := $start.AddDate 0 0 $i }}
+        {{- $key := $d.Format "2006-01-02" }}
+        {{- $c := index $heatMap $key | default 0 }}
+        {{- $level := 0 }}
+        {{- if ge $c 4 }}{{ $level = 4 }}{{ else if eq $c 3 }}{{ $level = 3 }}{{ else if eq $c 2 }}{{ $level = 2 }}{{ else if eq $c 1 }}{{ $level = 1 }}{{ end }}
+        {{- if gt $key $todayKey }}
+        <span class="stats-cell is-future" title="{{ $key }}"></span>
+        {{- else }}
+        <span class="stats-cell{{ if gt $c 0 }} l{{ $level }}{{ end }}" title="{{ $key }}{{ if gt $c 0 }} · {{ $c }} 篇{{ end }}"></span>
+        {{- end }}
+        {{- end }}
+      </div>
+    </div>
+    <div class="stats-heat-legend">
+      <span>少</span>
+      <span class="stats-cell"></span>
+      <span class="stats-cell l1"></span>
+      <span class="stats-cell l2"></span>
+      <span class="stats-cell l3"></span>
+      <span class="stats-cell l4"></span>
+      <span>多</span>
+      <span class="stats-heat-range">{{ $start.Format "2006-01-02" }} 至 {{ $todayKey }}</span>
+    </div>
+  </section>
+
+  <section class="stats-section">
+    <h2>写作节奏</h2>
+    <dl class="stats-overview stats-rhythm">
+      <div>
+        <dt>最长断更</dt>
+        <dd>{{ if gt $maxGap 0 }}{{ $maxGap }} 天{{ else }}—{{ end }}</dd>
+        {{- if gt $maxGap 0 }}<small>{{ $gapFromShort }} → {{ $gapToShort }}</small>{{ end }}
+      </div>
+      <div><dt>最近连续写作</dt><dd>{{ $streak }} 个月</dd><small>截至 {{ $last | default "—" }}</small></div>
+      <div><dt>月均篇数</dt><dd>{{ lang.FormatNumber 1 $avg }} 篇</dd><small>按 {{ len $months }} 个活跃月份</small></div>
+      <div><dt>最多产月份</dt><dd>{{ $topMonth | default "—" }}</dd><small>{{ $topMonthCount }} 篇</small></div>
+    </dl>
+
+    <h3>星期分布</h3>
+    <ol class="stats-bars stats-weekday">
+      {{- range $i := slice 1 2 3 4 5 6 0 }}
+      {{- $c := index $wdMap (printf "%d" $i) | default 0 }}
+      <li class="stats-bar-row">
+        <span class="stats-bar-label">周{{ index $wdLabels $i }}</span>
+        <span class="stats-bar-track">{{- if gt $c 0 }}<span class="stats-bar-fill" style="width: {{ div (mul $c 100) $maxWd }}%"></span>{{- end }}</span>
+        <span class="stats-bar-num">{{ $c }}</span>
+      </li>
+      {{- end }}
+    </ol>
+    {{- if $topWd }}
+    <p class="stats-note">发文最多的是{{ $topWd }}，共 {{ $maxWd }} 篇。</p>
+    {{- end }}
+  </section>
+
+  <section class="stats-section">
+    <h2>最近更新</h2>
+    {{- if $updates }}
+    <ul class="stats-update-list">
+      {{- range first 10 $updates }}
+      <li>
+        <a href="{{ .url }}">{{ .title }}</a>
+        {{- if $.showSource }} <span class="stats-source">{{ if eq .source "blog" }}博客{{ else }}知乎{{ end }}</span>{{ end }}
+        <time datetime="{{ .lastmod }}">{{ .lastmod }}</time>
+      </li>
+      {{- end }}
+    </ul>
+    {{- if gt (len $updates) 10 }}
+    <p class="stats-note">共 {{ len $updates }} 条更新，这里显示最近 10 条。</p>
+    {{- end }}
+    {{- else }}
+    <p class="stats-note">暂无“最后编辑晚于发布”的记录。</p>
+    {{- end }}
+  </section>
+  {{- else }}
+  <p class="stats-note">暂无发布记录。</p>
+  {{- end }}
+</section>

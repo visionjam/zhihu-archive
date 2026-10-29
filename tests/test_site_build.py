@@ -91,6 +91,83 @@ def temp_stats():
         path.write_bytes(backup)
 
 
+STATS_FIXTURE = {
+    "version": 1,
+    "generated_at": "2026-01-04T12:00:00+08:00",
+    "items": [
+        {
+            "source": "blog",
+            "kind": "posts",
+            "id": "posts/a",
+            "title": "BLOG-A",
+            "url": "https://example.com/posts/a/",
+            "rel_path": "/posts/a/",
+            "date": "2026-01-01",
+            "lastmod": "2026-01-01",
+            "words": 400,
+            "minutes": 1,
+            "votes": 0,
+            "comments": 0,
+            "site_likes": 0,
+            "duplicate": False,
+        },
+        {
+            "source": "zhihu",
+            "kind": "answers",
+            "id": "z1",
+            "title": "ZHIHU-B",
+            "url": "https://example.com/zhihu-archive/answers/z1/",
+            "rel_path": "/answers/z1/",
+            "date": "2026-01-02",
+            "lastmod": "2026-01-02",
+            "words": 400,
+            "minutes": 1,
+            "votes": 7,
+            "comments": 2,
+            "site_likes": 0,
+            "duplicate": False,
+        },
+        {
+            "source": "zhihu",
+            "kind": "answers",
+            "id": "z2",
+            "title": "ZHIHU-C",
+            "url": "https://example.com/zhihu-archive/answers/z2/",
+            "rel_path": "/answers/z2/",
+            "date": "2026-01-03",
+            "lastmod": "2026-01-04",
+            "words": 400,
+            "minutes": 1,
+            "votes": 5,
+            "comments": 1,
+            "site_likes": 0,
+            "duplicate": True,
+        },
+    ],
+}
+
+
+@pytest.fixture
+def temp_output_stats():
+    path = ROOT / "data" / "output_stats.json"
+    backup = path.read_bytes() if path.exists() else None
+
+    def write(data):
+        if data is None:
+            path.unlink(missing_ok=True)
+            return
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(
+            json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+
+    yield write
+    if backup is None:
+        path.unlink(missing_ok=True)
+    else:
+        path.write_bytes(backup)
+
+
 def stats_entry(
     kind, item_id, title, votes, words=100, minutes=1, comments=0, deleted=False
 ):
@@ -607,6 +684,49 @@ def test_stats_page_and_entry_links(tmp_path):
     assert 'href="/zhihu-archive/ranking/"' in home
     assert 'href="/zhihu-archive/stats/"' in ranking
     assert 'href="/zhihu-archive/ranking/"' in stats
+
+
+def test_stats_page_defaults_to_zhihu(tmp_path, temp_output_stats):
+    temp_output_stats(STATS_FIXTURE)
+    public = build_site(tmp_path)
+    html = read_page(public, "stats")
+
+    assert 'data-stats-default="zhihu"' in html
+    zhihu_tag = re.search(
+        r'<section[^>]*data-stats-panel="zhihu"[^>]*>', html
+    ).group(0)
+    blog_tag = re.search(
+        r'<section[^>]*data-stats-panel="blog"[^>]*>', html
+    ).group(0)
+    assert "hidden" not in zhihu_tag
+    assert "hidden" in blog_tag
+
+
+def test_stats_all_view_dedupes_and_keeps_engagement(tmp_path, temp_output_stats):
+    temp_output_stats(STATS_FIXTURE)
+    public = build_site(tmp_path)
+    html = read_page(public, "stats")
+
+    all_panel = re.search(
+        r'data-stats-panel="all"(.*?)data-stats-panel="blog"', html, re.S
+    ).group(1)
+    zhihu_panel = re.search(r'data-stats-panel="zhihu"(.*)', html, re.S).group(1)
+    assert "<dt>收录</dt><dd>2 篇</dd>" in all_panel
+    assert "<dt>总字数</dt><dd>800</dd>" in all_panel
+    assert "<dt>知乎赞</dt><dd>12</dd>" in all_panel
+    assert "跨站重复 1 篇已合并" in all_panel
+    assert "ZHIHU-C" not in all_panel
+    assert "<dt>收录</dt><dd>2 篇</dd>" in zhihu_panel
+    assert "ZHIHU-C" in zhihu_panel
+
+
+def test_stats_page_survives_missing_snapshot(tmp_path, temp_output_stats):
+    temp_output_stats(None)
+    public = build_site(tmp_path)
+    html = read_page(public, "stats")
+
+    assert 'data-stats-panel="zhihu"' in html
+    assert "暂无发布记录" in html
 
 
 def test_header_more_menu_groups_secondary_links(tmp_path):

@@ -247,6 +247,43 @@ body {
   border-bottom-color: #8fb8da;
 }
 
+/* 统计页范围标签 */
+.stats-tabs {
+  margin-top: 1.6rem;
+}
+
+.stats-tabs button.type-tab {
+  font-family: inherit;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+
+.stats-tabs button.type-tab.active {
+  border-bottom-color: #2f5d8a;
+}
+
+:root[data-theme="dark"] .stats-tabs button.type-tab.active {
+  border-bottom-color: #8fb8da;
+}
+
+.stats-view[hidden] {
+  display: none;
+}
+
+.stats-source {
+  display: inline-block;
+  margin: 0 0.4rem;
+  padding: 0 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--secondary);
+  font-size: 12px;
+  line-height: 1.5;
+  vertical-align: 1px;
+}
+
 /* 首页简介：收紧 PaperMod 默认 320px 最小高度，避免置顶/最新前出现大片空白 */
 .first-entry {
   min-height: auto;

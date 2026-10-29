@@ -71,6 +71,8 @@ params:
     - articles
     - pins
   homeLimit: 20
+  statsSource: zhihu
+  statsDefaultView: zhihu
   defaultTheme: auto
   ShowReadingTime: false
   ShowShareButtons: false
