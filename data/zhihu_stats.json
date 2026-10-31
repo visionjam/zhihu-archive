@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-10-28T14:47:20+00:00",
+  "generated_at": "2026-10-31T05:40:34+00:00",
   "totals": {
-    "items": 109,
-    "words": 47805,
-    "votes": 88,
+    "items": 111,
+    "words": 48259,
+    "votes": 89,
     "comments": 48,
     "by_kind": {
-      "answers": 13,
+      "answers": 14,
       "articles": 8,
-      "pins": 88
+      "pins": 89
     }
   },
   "items": {
@@ -154,6 +154,19 @@
       "comment_count": 0,
       "word_count": 377,
       "reading_minutes": 1
+    },
+    "answers:2099243146693587006": {
+      "kind": "answers",
+      "id": "2099243146693587006",
+      "title": "如何看待父母无恩论？",
+      "url": "https://www.zhihu.com/question/26860040/answer/2099243146693587006",
+      "rel_path": "/answers/2099243146693587006/",
+      "created": "2026-10-29",
+      "deleted": false,
+      "voteup_count": 1,
+      "comment_count": 0,
+      "word_count": 429,
+      "reading_minutes": 2
     },
     "answers:3570888126": {
       "kind": "answers",
@@ -1427,6 +1440,19 @@
       "voteup_count": 0,
       "comment_count": 0,
       "word_count": 112,
+      "reading_minutes": 1
+    },
+    "pins:2099413131646845779": {
+      "kind": "pins",
+      "id": "2099413131646845779",
+      "title": "没事的，这些人刷刷抖音红果一天就过去了。也挺幸福的",
+      "url": "https://www.zhihu.com/pin/2099413131646845779",
+      "rel_path": "/pins/2099413131646845779/",
+      "created": "2026-10-30",
+      "deleted": false,
+      "voteup_count": 0,
+      "comment_count": 0,
+      "word_count": 25,
       "reading_minutes": 1
     }
   }

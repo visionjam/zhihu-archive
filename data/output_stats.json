@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-29T16:42:05+08:00",
+  "generated_at": "2026-10-31T13:40:34+08:00",
   "items": [
     {
       "comments": 0,
@@ -1888,6 +1888,38 @@
       "url": "https://visionjam.github.io/zhihu-archive/pins/2098354600847923060/",
       "votes": 0,
       "words": 112
+    },
+    {
+      "comments": 0,
+      "date": "2026-10-29",
+      "duplicate": false,
+      "id": "2099243146693587006",
+      "kind": "answers",
+      "lastmod": "2026-10-29",
+      "minutes": 2,
+      "rel_path": "/answers/2099243146693587006/",
+      "site_likes": 0,
+      "source": "zhihu",
+      "title": "如何看待父母无恩论？",
+      "url": "https://visionjam.github.io/zhihu-archive/answers/2099243146693587006/",
+      "votes": 1,
+      "words": 429
+    },
+    {
+      "comments": 0,
+      "date": "2026-10-30",
+      "duplicate": false,
+      "id": "2099413131646845779",
+      "kind": "pins",
+      "lastmod": "2026-10-30",
+      "minutes": 1,
+      "rel_path": "/pins/2099413131646845779/",
+      "site_likes": 0,
+      "source": "zhihu",
+      "title": "没事的，这些人刷刷抖音红果一天就过去了。也挺幸福的",
+      "url": "https://visionjam.github.io/zhihu-archive/pins/2099413131646845779/",
+      "votes": 0,
+      "words": 25
     }
   ],
   "version": 1
