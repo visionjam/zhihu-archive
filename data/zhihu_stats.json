@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-10-31T05:40:34+00:00",
+  "generated_at": "2026-11-14T08:39:35+00:00",
   "totals": {
-    "items": 111,
-    "words": 48259,
-    "votes": 89,
+    "items": 115,
+    "words": 48922,
+    "votes": 96,
     "comments": 48,
     "by_kind": {
-      "answers": 14,
+      "answers": 16,
       "articles": 8,
-      "pins": 89
+      "pins": 91
     }
   },
   "items": {
@@ -168,6 +168,32 @@
       "word_count": 429,
       "reading_minutes": 2
     },
+    "answers:2101610056701814764": {
+      "kind": "answers",
+      "id": "2101610056701814764",
+      "title": "武汉警方通报网约车被狂欢人群围困4小时，对29岁男子予以治安处罚，对多人批评教育，怎样从法律角度解读？",
+      "url": "https://www.zhihu.com/question/2100687447990302290/answer/2101610056701814764",
+      "rel_path": "/answers/2101610056701814764/",
+      "created": "2026-11-05",
+      "deleted": false,
+      "voteup_count": 0,
+      "comment_count": 0,
+      "word_count": 33,
+      "reading_minutes": 1
+    },
+    "answers:2102136587769344004": {
+      "kind": "answers",
+      "id": "2102136587769344004",
+      "title": "大学生身挂 11 部手机无偿代跑校园跑，被查后独自扛下处分不供出同学，这算真义气还是真违规？",
+      "url": "https://www.zhihu.com/question/2101612544959969091/answer/2102136587769344004",
+      "rel_path": "/answers/2102136587769344004/",
+      "created": "2026-11-06",
+      "deleted": false,
+      "voteup_count": 0,
+      "comment_count": 0,
+      "word_count": 278,
+      "reading_minutes": 1
+    },
     "answers:3570888126": {
       "kind": "answers",
       "id": "3570888126",
@@ -215,7 +241,7 @@
       "rel_path": "/articles/2089726674011215411/",
       "created": "2026-10-03",
       "deleted": false,
-      "voteup_count": 8,
+      "voteup_count": 11,
       "comment_count": 0,
       "word_count": 4575,
       "reading_minutes": 12
@@ -228,7 +254,7 @@
       "rel_path": "/articles/2089739625048945495/",
       "created": "2026-10-03",
       "deleted": false,
-      "voteup_count": 13,
+      "voteup_count": 17,
       "comment_count": 0,
       "word_count": 5988,
       "reading_minutes": 15
@@ -1453,6 +1479,32 @@
       "voteup_count": 0,
       "comment_count": 0,
       "word_count": 25,
+      "reading_minutes": 1
+    },
+    "pins:2100523864639922856": {
+      "kind": "pins",
+      "id": "2100523864639922856",
+      "title": "核心是形成一个小的闭环其中正访馈的总量要覆盖负反馈的总量，总不能一直爽，也不能一",
+      "url": "https://www.zhihu.com/pin/2100523864639922856",
+      "rel_path": "/pins/2100523864639922856/",
+      "created": "2026-11-02",
+      "deleted": false,
+      "voteup_count": 0,
+      "comment_count": 0,
+      "word_count": 138,
+      "reading_minutes": 1
+    },
+    "pins:2104501467260383511": {
+      "kind": "pins",
+      "id": "2104501467260383511",
+      "title": "不得不说，没有埋怨大宾哥的意思，这句话对我来说来得太晚了，我已经过了最需要这句话",
+      "url": "https://www.zhihu.com/pin/2104501467260383511",
+      "rel_path": "/pins/2104501467260383511/",
+      "created": "2026-11-13",
+      "deleted": false,
+      "voteup_count": 0,
+      "comment_count": 0,
+      "word_count": 214,
       "reading_minutes": 1
     }
   }

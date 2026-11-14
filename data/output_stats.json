@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-31T13:40:34+08:00",
+  "generated_at": "2026-11-14T16:39:35+08:00",
   "items": [
     {
       "comments": 0,
@@ -1646,7 +1646,7 @@
       "source": "zhihu",
       "title": "Zemax 入门教程（上）：基础篇",
       "url": "https://visionjam.github.io/zhihu-archive/articles/2089726674011215411/",
-      "votes": 8,
+      "votes": 11,
       "words": 4575
     },
     {
@@ -1662,7 +1662,7 @@
       "source": "zhihu",
       "title": "Zemax 入门教程（下）：实战篇——三组态变焦镜头",
       "url": "https://visionjam.github.io/zhihu-archive/articles/2089739625048945495/",
-      "votes": 13,
+      "votes": 17,
       "words": 5988
     },
     {
@@ -1920,6 +1920,70 @@
       "url": "https://visionjam.github.io/zhihu-archive/pins/2099413131646845779/",
       "votes": 0,
       "words": 25
+    },
+    {
+      "comments": 0,
+      "date": "2026-11-02",
+      "duplicate": false,
+      "id": "2100523864639922856",
+      "kind": "pins",
+      "lastmod": "2026-11-02",
+      "minutes": 1,
+      "rel_path": "/pins/2100523864639922856/",
+      "site_likes": 0,
+      "source": "zhihu",
+      "title": "核心是形成一个小的闭环其中正访馈的总量要覆盖负反馈的总量，总不能一直爽，也不能一",
+      "url": "https://visionjam.github.io/zhihu-archive/pins/2100523864639922856/",
+      "votes": 0,
+      "words": 138
+    },
+    {
+      "comments": 0,
+      "date": "2026-11-05",
+      "duplicate": false,
+      "id": "2101610056701814764",
+      "kind": "answers",
+      "lastmod": "2026-11-05",
+      "minutes": 1,
+      "rel_path": "/answers/2101610056701814764/",
+      "site_likes": 0,
+      "source": "zhihu",
+      "title": "武汉警方通报网约车被狂欢人群围困4小时，对29岁男子予以治安处罚，对多人批评教育，怎样从法律角度解读？",
+      "url": "https://visionjam.github.io/zhihu-archive/answers/2101610056701814764/",
+      "votes": 0,
+      "words": 33
+    },
+    {
+      "comments": 0,
+      "date": "2026-11-06",
+      "duplicate": false,
+      "id": "2102136587769344004",
+      "kind": "answers",
+      "lastmod": "2026-11-06",
+      "minutes": 1,
+      "rel_path": "/answers/2102136587769344004/",
+      "site_likes": 0,
+      "source": "zhihu",
+      "title": "大学生身挂 11 部手机无偿代跑校园跑，被查后独自扛下处分不供出同学，这算真义气还是真违规？",
+      "url": "https://visionjam.github.io/zhihu-archive/answers/2102136587769344004/",
+      "votes": 0,
+      "words": 278
+    },
+    {
+      "comments": 0,
+      "date": "2026-11-13",
+      "duplicate": false,
+      "id": "2104501467260383511",
+      "kind": "pins",
+      "lastmod": "2026-11-13",
+      "minutes": 1,
+      "rel_path": "/pins/2104501467260383511/",
+      "site_likes": 0,
+      "source": "zhihu",
+      "title": "不得不说，没有埋怨大宾哥的意思，这句话对我来说来得太晚了，我已经过了最需要这句话",
+      "url": "https://visionjam.github.io/zhihu-archive/pins/2104501467260383511/",
+      "votes": 0,
+      "words": 214
     }
   ],
   "version": 1
