@@ -1,3 +1,4 @@
+import datetime as dt
 import json
 import re
 import shutil
@@ -362,7 +363,13 @@ def test_single_page_shows_votes_words_and_reading_time(
 
 
 def test_home_list_shows_words_and_reading_time(tmp_path, temp_bundles, temp_stats):
-    temp_bundles("answers", "_list_stats", "TABTEST-LIST-STATS", zhihu_id="list_stats")
+    temp_bundles(
+        "answers",
+        "_list_stats",
+        "TABTEST-LIST-STATS",
+        date=dt.date.today().isoformat(),
+        zhihu_id="list_stats",
+    )
     temp_stats(
         {
             "generated_at": "2026-01-01T00:00:00+00:00",
