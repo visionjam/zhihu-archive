@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-14T16:39:35+08:00",
+  "generated_at": "2026-11-21T15:14:49+08:00",
   "items": [
     {
       "comments": 0,
@@ -1646,7 +1646,7 @@
       "source": "zhihu",
       "title": "Zemax 入门教程（上）：基础篇",
       "url": "https://visionjam.github.io/zhihu-archive/articles/2089726674011215411/",
-      "votes": 11,
+      "votes": 12,
       "words": 4575
     },
     {
@@ -1662,7 +1662,7 @@
       "source": "zhihu",
       "title": "Zemax 入门教程（下）：实战篇——三组态变焦镜头",
       "url": "https://visionjam.github.io/zhihu-archive/articles/2089739625048945495/",
-      "votes": 17,
+      "votes": 18,
       "words": 5988
     },
     {
@@ -1902,7 +1902,7 @@
       "source": "zhihu",
       "title": "如何看待父母无恩论？",
       "url": "https://visionjam.github.io/zhihu-archive/answers/2099243146693587006/",
-      "votes": 1,
+      "votes": 2,
       "words": 429
     },
     {
@@ -1984,6 +1984,22 @@
       "url": "https://visionjam.github.io/zhihu-archive/pins/2104501467260383511/",
       "votes": 0,
       "words": 214
+    },
+    {
+      "comments": 0,
+      "date": "2026-11-21",
+      "duplicate": false,
+      "id": "2107490922191766455",
+      "kind": "articles",
+      "lastmod": "2026-11-21",
+      "minutes": 23,
+      "rel_path": "/articles/2107490922191766455/",
+      "site_likes": 0,
+      "source": "zhihu",
+      "title": "语音和文字：我的 ASR和TTS 使用记",
+      "url": "https://visionjam.github.io/zhihu-archive/articles/2107490922191766455/",
+      "votes": 0,
+      "words": 8987
     }
   ],
   "version": 1

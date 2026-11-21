@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-11-14T08:39:35+00:00",
+  "generated_at": "2026-11-21T07:14:49+00:00",
   "totals": {
-    "items": 115,
-    "words": 48922,
-    "votes": 96,
+    "items": 116,
+    "words": 57909,
+    "votes": 99,
     "comments": 48,
     "by_kind": {
       "answers": 16,
-      "articles": 8,
+      "articles": 9,
       "pins": 91
     }
   },
@@ -163,7 +163,7 @@
       "rel_path": "/answers/2099243146693587006/",
       "created": "2026-10-29",
       "deleted": false,
-      "voteup_count": 1,
+      "voteup_count": 2,
       "comment_count": 0,
       "word_count": 429,
       "reading_minutes": 2
@@ -241,7 +241,7 @@
       "rel_path": "/articles/2089726674011215411/",
       "created": "2026-10-03",
       "deleted": false,
-      "voteup_count": 11,
+      "voteup_count": 12,
       "comment_count": 0,
       "word_count": 4575,
       "reading_minutes": 12
@@ -254,7 +254,7 @@
       "rel_path": "/articles/2089739625048945495/",
       "created": "2026-10-03",
       "deleted": false,
-      "voteup_count": 17,
+      "voteup_count": 18,
       "comment_count": 0,
       "word_count": 5988,
       "reading_minutes": 15
@@ -323,6 +323,19 @@
       "comment_count": 0,
       "word_count": 5005,
       "reading_minutes": 13
+    },
+    "articles:2107490922191766455": {
+      "kind": "articles",
+      "id": "2107490922191766455",
+      "title": "语音和文字：我的 ASR和TTS 使用记",
+      "url": "https://zhuanlan.zhihu.com/p/2107490922191766455",
+      "rel_path": "/articles/2107490922191766455/",
+      "created": "2026-11-21",
+      "deleted": false,
+      "voteup_count": 0,
+      "comment_count": 0,
+      "word_count": 8987,
+      "reading_minutes": 23
     },
     "pins:1796261481253310464": {
       "kind": "pins",
