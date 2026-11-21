@@ -10,6 +10,11 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def recent_date():
+    """今天。Hugo 默认不构建未来日期，所以「要进首页」的测试用今天而不是远期日期。"""
+    return dt.date.today().isoformat()
+
+
 def build_site(tmp_path):
     public = tmp_path / "public"
     subprocess.run(
@@ -367,7 +372,7 @@ def test_home_list_shows_words_and_reading_time(tmp_path, temp_bundles, temp_sta
         "answers",
         "_list_stats",
         "TABTEST-LIST-STATS",
-        date=dt.date.today().isoformat(),
+        date=recent_date(),
         zhihu_id="list_stats",
     )
     temp_stats(
