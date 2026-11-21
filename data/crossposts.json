@@ -23,5 +23,10 @@
     "blog_title": "Android 优化体验指南（四）：进阶——adb 与 Shizuku",
     "title": "Android 优化体验指南（四）：进阶——adb 与 Shizuku",
     "url": "https://visionjam.github.io/android-guide/04-advanced-adb-shizuku/"
+  },
+  "2107490922191766455": {
+    "blog_title": "语音和文字：我的 ASR和TTS 使用记",
+    "title": "语音和文字：我的 ASR和TTS 使用记",
+    "url": "https://visionjam.github.io/posts/how-i-use-asrtts/"
   }
 }

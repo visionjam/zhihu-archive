@@ -4,6 +4,8 @@ date: 2026-11-21
 lastmod: 2026-11-21
 type: articles
 zhihu_id: "2107490922191766455"
+canonicalURL: "https://visionjam.github.io/posts/how-i-use-asrtts/"
+ShowCanonicalLink: true
 zhihu_url: "https://zhuanlan.zhihu.com/p/2107490922191766455"
 deleted: false
 archived_at: 2026-11-21
